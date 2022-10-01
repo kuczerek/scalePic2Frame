@@ -54,7 +54,6 @@ public class LogComponent extends JPanel {
 	    dtm.addRow(new Object[]{ "[" + current + " von " + total + "] ", entry, "", "", "", "" });
 	    JScrollBar vertical = scrollPane.getVerticalScrollBar();
 	    vertical.setValue( vertical.getMaximum() );
-	    System.out.println("done");
     }
 
 	public void endEntry(String targetFile, int dateSource, int commentSource, String comment) {

@@ -12,8 +12,8 @@ import java.awt.FontFormatException;
 import java.awt.FontMetrics;
 import java.awt.font.TextAttribute;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -56,7 +56,6 @@ public class Picture {
 	
 
 	public Picture(File sourceFile) {
-		super();
 		this.sourceFile = sourceFile;
 		
 		BufferedImage origBi = null;
@@ -271,11 +270,18 @@ public class Picture {
 		
 		//Schrift erzeugen
 		Font font = null;
-		try {
-			font = Font.createFont(Font.TRUETYPE_FONT, new FileInputStream("res\\FreeSansBold.ttf"));
-		} catch (FontFormatException | IOException e) {
-			e.printStackTrace();
-		}
+//		try {
+//			font = Font.createFont(Font.TRUETYPE_FONT, new FileInputStream("res\\FreeSansBold.ttf"));
+//		} catch (FontFormatException | IOException e) {
+//			e.printStackTrace();
+//		}
+        final ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        try (InputStream stream = loader.getResourceAsStream("FreeSansBold.ttf")) {
+            font = Font.createFont(Font.TRUETYPE_FONT, stream);
+        } catch (FontFormatException | IOException ex) {
+        	ex.printStackTrace();
+        }
+		
 		Hashtable<TextAttribute, Object> attributes = new Hashtable<TextAttribute, Object>();
 		attributes.put(TextAttribute.KERNING, TextAttribute.KERNING_ON);
 		attributes.put(TextAttribute.SIZE, Specs.textSize);
