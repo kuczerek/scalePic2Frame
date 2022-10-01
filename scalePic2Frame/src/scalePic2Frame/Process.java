@@ -33,7 +33,6 @@ public class Process {
         	    	Path currentPath = it.next();
         	    	//this.desktop.newLogEntry("Datei: " + currentPath.toFile().getName(), current, allFiles.size());
         	    	desktop.startLogEntry("Datei: " + currentPath, current, allFiles.size());
-        	    	
         	    	processPicture(currentPath.toFile());
         	    }
             }
