@@ -410,17 +410,17 @@ public class Picture {
 		
 	    /*
 	     * Welches Datum wollen wir jetzt für das Bild nehmen?
-	     * Wir entscheiden uns für das JPEG Kommentar
+	     * Wir entscheiden uns für das commentExifSubIFD Kommentar
 	     */
 	    
 	    String commentMetaData = new String();
-	    if (commentJpegComment != null && !commentJpegComment.isEmpty() ) {
+	    if (commentExifSubIFD != null && !commentExifSubIFD.isEmpty() ) {
 			/*
-			 * Es gibt einen Kommentar in den JPEG Daten, den legen wir jetzt für die
+			 * Es gibt einen Kommentar in den EXIF Daten, den legen wir jetzt für die
 			 * Weitervarbeitung in commentMetaData
 			 */
-			currentCommentSource = COMMENTSOURCE_JPEG;
-			commentMetaData = commentJpegComment;
+			currentCommentSource = COMMENTSOURCE_EXIF;
+			commentMetaData = commentExifSubIFD;
 		}
 		
 		
