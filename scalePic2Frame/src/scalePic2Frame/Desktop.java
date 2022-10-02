@@ -84,8 +84,14 @@ public class Desktop extends JFrame implements ActionListener {
 		repaint();
 	}
 	
-	public void endLogEntry(String log, int dateSource, int commentSource, String comment) {
-		logComp.endEntry(log, dateSource, commentSource, comment);
+	public void picLoadedLogEntry(int width, int height) {
+		logComp.picLoadedEntry(width, height);
+		validate();
+		repaint();
+	}
+	
+	public void endLogEntry(String log, int width, int height, int dateSource, int commentSource, String comment) {
+		logComp.endEntry(log, width, height, dateSource, commentSource, comment);
 	}
 	
 	public void newPreviewPicture(BufferedImage img) {

@@ -27,32 +27,30 @@ public class Process {
 		Thread scaleFiles = new Thread(new Runnable() {
             @Override
             public void run() {
+            	
+            	Picture pic;
             	ListIterator<Path> it = allFiles.listIterator();
-        	    while(it.hasNext()) {
-        	    	int current = it.nextIndex() + 1;
+
+            	while(it.hasNext()) {
+
+            		int current = it.nextIndex() + 1;
         	    	Path currentPath = it.next();
-        	    	//this.desktop.newLogEntry("Datei: " + currentPath.toFile().getName(), current, allFiles.size());
-        	    	desktop.startLogEntry("Datei: " + currentPath, current, allFiles.size());
-        	    	processPicture(currentPath.toFile());
+        	    	desktop.startLogEntry(currentPath.toString(), current, allFiles.size());
+    		    	pic = new Picture(currentPath.toFile());
+    		    	desktop.picLoadedLogEntry(pic.getSourcePictureWidth(), pic.getSourcePictureHeight());
+    				if (pic.shouldWeProcessPicture()) {
+    					pic.scalePicture();
+    					pic.orientPicture();
+    					pic.drawOnPicture();
+    					desktop.newPreviewPicture(pic.getTargetPicture());
+    					desktop.endLogEntry(pic.getTargetPicturePath(), pic.getTargetPictureWidth(), pic.getTargetPictureHeight(), pic.getDateSource(), pic.getCommentSource(), pic.getComment());
+    					pic.savePicture();
+    				} else {
+    					desktop.endLogEntry(pic.getSkipInfo(), pic.getTargetPictureWidth(), pic.getTargetPictureHeight(), pic.getDateSource(), pic.getCommentSource(), pic.getComment());
+    				}
         	    }
             }
         });         
 		scaleFiles.start();
-	}
-	
-	private void processPicture(File picture) {
-				
-		Picture pic = new Picture(picture);
-		if (pic.shouldWeProcessPicture()) {
-			pic.scalePicture();
-			pic.orientPicture();
-			pic.drawOnPicture();
-			desktop.newPreviewPicture(pic.getTargetPicture());
-			desktop.endLogEntry(pic.getTargetPicturePath(),pic.getDateSource(), pic.getCommentSource(), pic.getComment());
-			pic.savePicture();
-		} else {
-			desktop.endLogEntry(pic.getSkipInfo(),pic.getDateSource(), pic.getCommentSource(), pic.getComment());
-		}
-		
 	}
 }

@@ -26,7 +26,9 @@ public class LogComponent extends JPanel {
 	  JTable logTable = new JTable();
 	  logTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 	  dtm = new DefaultTableModel(0, 0);
-	  String header[] = new String[] { "Anzahl", "Quelle", "Ziel", "Datumquelle", "Kommentarquelle", "Beschriftung" };
+	  //Spalten                            0         1        2           3          4       5           6            7               8                  9
+	  //String header[] = new String[] { "Anzahl", "Quelle", "Größe", "Verhältnis", "Ziel", "Größe", "Verhältnis", "Datumquelle", "Kommentarquelle", "Beschriftung" };
+	  String header[] = new String[] { "Anzahl", "Quelle", "Größe", "Ziel", "Größe", "Datumquelle", "Kommentarquelle", "Beschriftung" };
 	  
 	  //add header in table model     
 	  dtm.setColumnIdentifiers(header);	  
@@ -34,11 +36,14 @@ public class LogComponent extends JPanel {
 	  //set model into the table object
 	  logTable.setModel(dtm);
 	  logTable.getColumnModel().getColumn(0).setPreferredWidth(80);
-	  logTable.getColumnModel().getColumn(1).setPreferredWidth(550);
-	  logTable.getColumnModel().getColumn(2).setPreferredWidth(550);
-	  logTable.getColumnModel().getColumn(3).setPreferredWidth(70);
+	  logTable.getColumnModel().getColumn(1).setPreferredWidth(520);
+	  logTable.getColumnModel().getColumn(2).setPreferredWidth(70);
+	  //logTable.getColumnModel().getColumn(3).setPreferredWidth(50);
+	  logTable.getColumnModel().getColumn(3).setPreferredWidth(520);
 	  logTable.getColumnModel().getColumn(4).setPreferredWidth(70);
-	  logTable.getColumnModel().getColumn(5).setPreferredWidth(400);
+	  logTable.getColumnModel().getColumn(5).setPreferredWidth(70);
+	  logTable.getColumnModel().getColumn(6).setPreferredWidth(70);
+	  logTable.getColumnModel().getColumn(7).setPreferredWidth(400);
 
 	  scrollPane = new JScrollPane(logTable);
 	  GridBagConstraints c = new GridBagConstraints();
@@ -55,8 +60,15 @@ public class LogComponent extends JPanel {
 	    JScrollBar vertical = scrollPane.getVerticalScrollBar();
 	    vertical.setValue( vertical.getMaximum() );
     }
+    
+    public void picLoadedEntry(int width, int height) {
+    	dtm.setValueAt(width + "x" + height, dtm.getRowCount()-1, 2);
+    	//dtm.setValueAt(createRatioString(width, height), dtm.getRowCount()-1, 3);
+	    JScrollBar vertical = scrollPane.getVerticalScrollBar();
+	    vertical.setValue( vertical.getMaximum() );
+    }
 
-	public void endEntry(String targetFile, int dateSource, int commentSource, String comment) {
+	public void endEntry(String targetFile, int width, int height, int dateSource, int commentSource, String comment) {
 		
 		String dateSourceString;
 		String commentSourceString;
@@ -86,10 +98,46 @@ public class LogComponent extends JPanel {
 	    	commentSourceString = "";
 		}
 		
-		dtm.setValueAt(targetFile, dtm.getRowCount()-1, 2);
-		dtm.setValueAt(dateSourceString, dtm.getRowCount()-1, 3);
-		dtm.setValueAt(commentSourceString, dtm.getRowCount()-1, 4);
-		dtm.setValueAt(comment, dtm.getRowCount()-1, 5);
+		dtm.setValueAt(targetFile, dtm.getRowCount()-1, 3);
+		dtm.setValueAt(width + "x" + height, dtm.getRowCount()-1, 4);
+		//dtm.setValueAt(createRatioString(width, height), dtm.getRowCount()-1, 6);
+		dtm.setValueAt(dateSourceString, dtm.getRowCount()-1, 5);
+		dtm.setValueAt(commentSourceString, dtm.getRowCount()-1, 6);
+		dtm.setValueAt(comment, dtm.getRowCount()-1, 7);
 
 	}
+	
+//	private String createRatioString(int width, int height) {
+//		
+//		String ratioString;
+//		
+//		//Das Verhältnis wird mit 100 multipliziert und in int umgerechnet
+//		int ratio;
+//		
+//		if (width > height) {
+//			ratio = (int)(( (float) width/ (float) height) * 100f);
+//		} else {
+//			ratio = (int)(( (float) height/ (float) width) * 100f);
+//		}
+//		
+//		switch (ratio) {
+//		case 133:
+//			ratioString = "4:3";
+//			break;
+//		case 150:
+//			ratioString = "3:2";
+//			break;
+//		case 177:
+//			ratioString = "16:9";
+//			break;
+//		case 233:
+//			ratioString = "21:9";
+//			break;
+//		default:
+//			ratioString = String.valueOf(ratio);
+//		}
+//		
+//		
+//		return ratioString;
+//	}
 }

@@ -498,6 +498,44 @@ public class Picture {
 		return comment;
 	}
 	
+	public int getSourcePictureWidth() {
+		
+		if (origBi != null) {
+			return origBi.getWidth();
+		}
+		else {
+			return 0;
+		}
+	}
+	
+	public int getSourcePictureHeight() {
+		
+		if (origBi != null) {
+			return origBi.getHeight();
+		} else {
+			return 0;
+		}
+		
+	}
+	
+	public int getTargetPictureWidth() {
+		
+		if (targetBi != null) {
+			return targetBi.getWidth();
+		} else {
+			return 0;
+		}
+	}
+	
+	public int getTargetPictureHeight() {
+		
+		if (targetBi != null) {
+			return targetBi.getHeight();
+		} else {
+			return 0;
+		}
+	}
+	
 	public String getSkipInfo() {
 		return skipInfo;
 	}
