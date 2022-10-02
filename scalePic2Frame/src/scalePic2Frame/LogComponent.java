@@ -91,6 +91,9 @@ public class LogComponent extends JPanel {
 	    case Picture.COMMENTSOURCE_EXIF:
 	    	commentSourceString = "EXIF";
 	        break;
+	    case Picture.COMMENTSOURCE_JPEG:
+	    	commentSourceString = "JPEG";
+	        break;
 	    case Picture.COMMENTSOURCE_DIRECTORYONLY:
 	    	commentSourceString = "Verzeichnis";
 	        break;

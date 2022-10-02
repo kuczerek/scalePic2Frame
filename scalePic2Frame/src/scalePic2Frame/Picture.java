@@ -30,6 +30,7 @@ import javax.imageio.ImageIO;
 import com.drew.metadata.Metadata;
 import com.drew.metadata.exif.ExifIFD0Directory;
 import com.drew.metadata.exif.ExifSubIFDDirectory;
+import com.drew.metadata.jpeg.JpegCommentDirectory;
 //import com.drew.metadata.jpeg.JpegCommentDirectory;
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
@@ -41,7 +42,7 @@ public class Picture {
 	private BufferedImage origBi;
 	private ExifIFD0Directory exifIFD0Directory;
 	private ExifSubIFDDirectory exifSubIFDDirectory;
-	//private JpegCommentDirectory jpegCommentDirectory;
+	private JpegCommentDirectory jpegCommentDirectory;
 	
 	private int currentDateSource;
 	private int currentCommentSource;
@@ -53,6 +54,7 @@ public class Picture {
 	public static final int DATESOURCE_FILE = 3;
 	public static final int COMMENTSOURCE_EXIF = 1;
 	public static final int COMMENTSOURCE_DIRECTORYONLY = 2;
+	public static final int COMMENTSOURCE_JPEG = 3;
 	
 
 	public Picture(File sourceFile) {
@@ -76,7 +78,7 @@ public class Picture {
 		}
 		this.exifIFD0Directory = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
 		this.exifSubIFDDirectory = metadata.getFirstDirectoryOfType(ExifSubIFDDirectory.class);
-		//this.jpegCommentDirectory = metadata.getFirstDirectoryOfType(JpegCommentDirectory.class);
+		this.jpegCommentDirectory = metadata.getFirstDirectoryOfType(JpegCommentDirectory.class);
 		
 		currentDateSource = 0;
 		currentCommentSource = 0;
@@ -270,11 +272,6 @@ public class Picture {
 		
 		//Schrift erzeugen
 		Font font = null;
-//		try {
-//			font = Font.createFont(Font.TRUETYPE_FONT, new FileInputStream("res\\FreeSansBold.ttf"));
-//		} catch (FontFormatException | IOException e) {
-//			e.printStackTrace();
-//		}
         final ClassLoader loader = Thread.currentThread().getContextClassLoader();
         try (InputStream stream = loader.getResourceAsStream("FreeSansBold.ttf")) {
             font = Font.createFont(Font.TRUETYPE_FONT, stream);
@@ -307,6 +304,8 @@ public class Picture {
 		
 		String comment;
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+		String commentJpegComment = null;
+		String commentExifIFD0 = null;
 		String commentExifSubIFD = null;
 		String commentFromPath = null;
 		LocalDate localDateExifSubIFD = null;
@@ -366,37 +365,71 @@ public class Picture {
 		
 		/*
 		 * Jetzt besorgen wir EXIF Daten, wenn welche vorliegen
+		 * Es gibt tausend Möglichkeiten für Kommentare und Datümer. Wir holen mal ein paar.
 		 */
-		if (this.exifSubIFDDirectory != null) {
-			Date dateExifSubIFD;
-
-			//Es gibt tausend Möglichkeiten für Kommentare und Datümer. Wir holen mal ein paar.
-			//commentExifIFD0 = this.exifIFD0Directory.getString(ExifIFD0Directory.TAG_IMAGE_DESCRIPTION);
-			//commentJPG = this.jpegCommentDirectory.getString(JpegCommentDirectory.TAG_COMMENT);
+	    
+	    //EXIF Datum aus exifSubIFDDirectory
+	    if (this.exifSubIFDDirectory != null) {
+			Date dateExifSubIFD = this.exifSubIFDDirectory.getDate(ExifSubIFDDirectory.TAG_DATETIME_ORIGINAL);
+			localDateExifSubIFD = dateExifSubIFD.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+		}
+	    
+	    //Kommentar aus exifSubIFDDirectory
+	    if (this.exifSubIFDDirectory != null) {
 			commentExifSubIFD = this.exifSubIFDDirectory.getDescription(ExifSubIFDDirectory.TAG_USER_COMMENT);
 			if (commentExifSubIFD != null) {
 				commentExifSubIFD = commentExifSubIFD.trim();
 			}
-			dateExifSubIFD = this.exifSubIFDDirectory.getDate(ExifSubIFDDirectory.TAG_DATETIME_ORIGINAL);
-			localDateExifSubIFD = dateExifSubIFD.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 		}
-		
+	    
+	    //Kommentar aus exifIFD0Directory
+	    if (this.exifIFD0Directory != null) {
+			commentExifIFD0 = this.exifIFD0Directory.getString(ExifIFD0Directory.TAG_IMAGE_DESCRIPTION);
+			if (commentExifIFD0 != null) {
+				commentExifIFD0 = commentExifIFD0.trim();
+			}
+		}
+
+	    //Kommentar aus jpegCommentDirectory
+	    if (this.jpegCommentDirectory != null) {
+			commentJpegComment = this.jpegCommentDirectory.getString(JpegCommentDirectory.TAG_COMMENT);
+			if (commentJpegComment != null) {
+				commentJpegComment = commentJpegComment.trim();
+			}
+		}
+	 
 		/*
 		 * Zusammenbau des vollen Kommentars
-		 */
-		
+		 */    
 		
 		/*
 		 * Wir beladen den Kommentar mit den Verzechnisdaten vor
 		 */
 		comment = new String(commentFromPath);
 		currentCommentSource = COMMENTSOURCE_DIRECTORYONLY;
-		if (commentExifSubIFD != null && !commentExifSubIFD.isEmpty() ) {
+		
+	    /*
+	     * Welches Datum wollen wir jetzt für das Bild nehmen?
+	     * Wir entscheiden uns für das JPEG Kommentar
+	     */
+	    
+	    String commentMetaData = new String();
+	    if (commentJpegComment != null && !commentJpegComment.isEmpty() ) {
 			/*
-			 * Es gibt einen Kommentar in den EXIF Daten, den hängen wir dran
+			 * Es gibt einen Kommentar in den JPEG Daten, den legen wir jetzt für die
+			 * Weitervarbeitung in commentMetaData
 			 */
-			currentCommentSource = COMMENTSOURCE_EXIF;
-			comment = comment + " - " + commentExifSubIFD;
+			currentCommentSource = COMMENTSOURCE_JPEG;
+			commentMetaData = commentJpegComment;
+		}
+		
+		
+		if (commentMetaData != null && !commentMetaData.isEmpty() ) {
+			/*
+			 * Es gibt einen Kommentar in den META Daten, den hängen wir an den bestenhenen 
+			 * Kommentar aus dem Pfad dran
+			 */
+			comment = comment + " - " + commentMetaData;
 		}
 		
 		if (localDateExifSubIFD != null) {
@@ -425,11 +458,11 @@ public class Picture {
 		if (fm.stringWidth(comment) > this.targetBi.getWidth() - 20) {
 			
 			/*
-			 * Scheint nicht so, also lassen wir mal den Pfad weg, wenn es einen EXIF Kommentar gibt
+			 * Scheint nicht so, also lassen wir mal den Pfad weg, wenn es einen META Kommentar gibt
 			 * Andernfalls setzen wir nur den Pfad
 			 */
-			if (commentExifSubIFD != null && !commentExifSubIFD.isEmpty() ) {
-				comment = new String(commentExifSubIFD);
+			if (commentMetaData != null && !commentMetaData.isEmpty() ) {
+				comment = new String(commentMetaData);
 			} else {
 				comment = new String(commentFromPath);
 			}
@@ -447,11 +480,11 @@ public class Picture {
 		if (fm.stringWidth(comment) > this.targetBi.getWidth() - 20) {
 			
 			/*
-			 * Scheint immer noch nicht so, also lassen wir mal den Pfad weg, wenn es einen EXIF Kommentar gibt
+			 * Scheint immer noch nicht so, also lassen wir mal den Pfad weg, wenn es einen META Kommentar gibt
 			 * Andernfalls setzen wir nur den Pfad und lassen auch das Datum weg
 			 */
-			if (commentExifSubIFD != null && !commentExifSubIFD.isEmpty() ) {
-				comment = new String(commentExifSubIFD);
+			if (commentMetaData != null && !commentMetaData.isEmpty() ) {
+				comment = new String(commentMetaData);
 			} else {
 				comment = new String(commentFromPath);
 			}
