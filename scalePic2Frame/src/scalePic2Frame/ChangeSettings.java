@@ -27,13 +27,13 @@ public class ChangeSettings extends JFrame implements ActionListener{
 
 	Desktop desktop;
 	
-	JFormattedTextField JtfMaxScaleHeight;
-	JFormattedTextField JtfMinScaleWidth;
-	JFormattedTextField JtfMinHeight;
-	JFormattedTextField JtfMinWidth;
-	JFormattedTextField JtfTextSize;
-	JLabel JtfPhotoAlbumPath;
-	JLabel JtfTargetPath;	
+	JFormattedTextField jtfMaxScaleHeight;
+	JFormattedTextField jtfMaxScaleWidth;
+	JFormattedTextField jtfMinHeight;
+	JFormattedTextField jtfMinWidth;
+	JFormattedTextField jtfTextSize;
+	JLabel jtfPhotoAlbumPath;
+	JLabel jtfTargetPath;	
 	JButton JButPhotoAlbumPath;
 	JButton JButTargetPath;
 	
@@ -71,23 +71,23 @@ public class ChangeSettings extends JFrame implements ActionListener{
 	     * Textfelder für die zweite Spalte vorbereiten
 	     */
 		
-		JtfMaxScaleHeight = buildIntegerTextFields();
-		JtfMinScaleWidth = buildIntegerTextFields();
-		JtfMinHeight = buildIntegerTextFields();
-		JtfMinWidth = buildIntegerTextFields();
-		JtfTextSize = buildIntegerTextFields();
-		JtfPhotoAlbumPath = new JLabel();
-		JtfTargetPath = new JLabel();
+		jtfMaxScaleHeight = buildIntegerTextFields();
+		jtfMaxScaleWidth = buildIntegerTextFields();
+		jtfMinHeight = buildIntegerTextFields();
+		jtfMinWidth = buildIntegerTextFields();
+		jtfTextSize = buildIntegerTextFields();
+		jtfPhotoAlbumPath = new JLabel();
+		jtfTargetPath = new JLabel();
 		
 		;
 		
-	    JtfMaxScaleHeight.setText(Integer.toString(Specs.maxScaleHeight));
-	    JtfMinScaleWidth.setText(Integer.toString(Specs.maxScaleWidth));
-		JtfMinHeight.setText(Integer.toString(Specs.minHeight));
-		JtfMinWidth.setText(Integer.toString(Specs.minWidth));
-		JtfTextSize.setText(Integer.toString(Specs.textSize));
-		JtfPhotoAlbumPath.setText(Specs.photoAlbumPath);
-		JtfTargetPath.setText(Specs.targetPath);
+		jtfMaxScaleWidth.setText(Integer.toString(Specs.maxScaleWidth));
+		jtfMaxScaleHeight.setText(Integer.toString(Specs.maxScaleHeight));
+		jtfMinWidth.setText(Integer.toString(Specs.minWidth));
+		jtfMinHeight.setText(Integer.toString(Specs.minHeight));
+		jtfTextSize.setText(Integer.toString(Specs.textSize));
+		jtfPhotoAlbumPath.setText(Specs.photoAlbumPath);
+		jtfTargetPath.setText(Specs.targetPath);
 	    		
 		/*
 		 * Zweite Spalte zusammenbauen
@@ -101,10 +101,10 @@ public class ChangeSettings extends JFrame implements ActionListener{
 	    gbc.gridy = 0;
 	    gbc.weightx = 0;
 	    gbc.fill=GridBagConstraints.NONE;
-	    settings.add(JtfMaxScaleHeight, gbc);
+	    settings.add(jtfMaxScaleWidth, gbc);
 	    gbc.gridx = GridBagConstraints.RELATIVE;
 	    settings.add(new JLabel("x"), gbc);
-	    settings.add(JtfMinScaleWidth, gbc);
+	    settings.add(jtfMaxScaleHeight, gbc);
 	    gbc.weightx = 1;
 	    gbc.fill=GridBagConstraints.HORIZONTAL;
 	    settings.add(new JLabel(), gbc);
@@ -116,10 +116,10 @@ public class ChangeSettings extends JFrame implements ActionListener{
 	    gbc.gridy = 1;
 	    gbc.weightx = 0;
 	    gbc.fill=GridBagConstraints.NONE;
-	    settings.add(JtfMinHeight, gbc);
+	    settings.add(jtfMinWidth, gbc);
 	    gbc.gridx = GridBagConstraints.RELATIVE;
 	    settings.add(new JLabel("x"), gbc);
-	    settings.add(JtfMinWidth, gbc);
+	    settings.add(jtfMinHeight, gbc);
 	    gbc.weightx = 1;
 	    gbc.fill=GridBagConstraints.HORIZONTAL;
 	    settings.add(new JLabel(), gbc);
@@ -131,7 +131,7 @@ public class ChangeSettings extends JFrame implements ActionListener{
 	    gbc.gridy = 2;
 	    gbc.weightx = 0;
 	    gbc.fill=GridBagConstraints.NONE;
-	    settings.add(JtfTextSize, gbc);
+	    settings.add(jtfTextSize, gbc);
 	    gbc.weightx = 1;
 	    gbc.gridwidth = 3;
 	    gbc.fill=GridBagConstraints.HORIZONTAL;
@@ -143,7 +143,7 @@ public class ChangeSettings extends JFrame implements ActionListener{
 	    gbc.gridx = 1;
 	    gbc.gridy = GridBagConstraints.RELATIVE;
 	    gbc.gridwidth = 4;
-	    settings.add(JtfPhotoAlbumPath, gbc);
+	    settings.add(jtfPhotoAlbumPath, gbc);
 	    gbc.gridx = 5;
 	    gbc.gridy = 3;
 	    JButPhotoAlbumPath = new JButton("Ändern");
@@ -151,7 +151,7 @@ public class ChangeSettings extends JFrame implements ActionListener{
 	    settings.add(JButPhotoAlbumPath, gbc);
 	    gbc.gridx = 1;
 	    gbc.gridy = GridBagConstraints.RELATIVE;
-	    settings.add(JtfTargetPath, gbc);
+	    settings.add(jtfTargetPath, gbc);
 	    gbc.gridx = 5;
 	    gbc.gridy = 4;
 	    JButTargetPath = new JButton("Ändern");
@@ -188,13 +188,13 @@ public class ChangeSettings extends JFrame implements ActionListener{
 
 		if (e.getActionCommand().equals("OK")) {
 						
-			Specs.maxScaleHeight =  Integer.parseInt(JtfMaxScaleHeight.getText());
-			Specs.maxScaleWidth =  Integer.parseInt(JtfMinScaleWidth.getText());
-			Specs.minHeight = Integer.parseInt(JtfMinHeight.getText());
-			Specs.minWidth = Integer.parseInt(JtfMinWidth.getText());
-			Specs.textSize = Integer.parseInt(JtfTextSize.getText());
-			Specs.photoAlbumPath = JtfPhotoAlbumPath.getText();
-			Specs.targetPath = JtfTargetPath.getText();
+			Specs.maxScaleHeight =  Integer.parseInt(jtfMaxScaleHeight.getText());
+			Specs.maxScaleWidth =  Integer.parseInt(jtfMaxScaleWidth.getText());
+			Specs.minHeight = Integer.parseInt(jtfMinHeight.getText());
+			Specs.minWidth = Integer.parseInt(jtfMinWidth.getText());
+			Specs.textSize = Integer.parseInt(jtfTextSize.getText());
+			Specs.photoAlbumPath = jtfPhotoAlbumPath.getText();
+			Specs.targetPath = jtfTargetPath.getText();
 			desktop.refillSpecData();
 			Specs specs = new Specs();
 			specs.writeUserPreferences();
@@ -214,7 +214,7 @@ public class ChangeSettings extends JFrame implements ActionListener{
 			chooser.setMultiSelectionEnabled(false);
 		    int returnVal = chooser.showOpenDialog(null);
 		    if(returnVal == JFileChooser.APPROVE_OPTION) {
-		    	JtfPhotoAlbumPath.setText(chooser.getSelectedFile().getAbsolutePath());
+		    	jtfPhotoAlbumPath.setText(chooser.getSelectedFile().getAbsolutePath());
 		    }
 		}
 		
@@ -227,7 +227,7 @@ public class ChangeSettings extends JFrame implements ActionListener{
 			chooser.setMultiSelectionEnabled(false);
 		    int returnVal = chooser.showOpenDialog(null);
 		    if(returnVal == JFileChooser.APPROVE_OPTION) {
-		    	JtfTargetPath.setText(chooser.getSelectedFile().getAbsolutePath());
+		    	jtfTargetPath.setText(chooser.getSelectedFile().getAbsolutePath());
 		    }
 		}
 		

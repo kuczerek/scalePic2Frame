@@ -20,8 +20,8 @@ public class ControlComponent extends JPanel {
 	
     private JLabel jLPhotoAlbumPath;
     private JLabel jLTargetPath;
-    private JLabel jLMinHeightWidth;
-    private JLabel jLMaxScaleHeightWidth;
+    private JLabel jLMinWidthHeight;
+    private JLabel jLMaxScaleWidthHeight;
     private JLabel jLTextSize;
 	
 	public ControlComponent(Desktop desktop) {
@@ -91,15 +91,15 @@ public class ControlComponent extends JPanel {
 	    
 	    jLPhotoAlbumPath = new JLabel();
 	    jLTargetPath  = new JLabel();
-	    jLMinHeightWidth  = new JLabel();
-	    jLMaxScaleHeightWidth  = new JLabel();
+	    jLMinWidthHeight  = new JLabel();
+	    jLMaxScaleWidthHeight  = new JLabel();
 	    jLTextSize  = new JLabel();
 	    fillSpecLabels();
 	    
 	    einstellungen.add(jLPhotoAlbumPath, gbc);
 	    einstellungen.add(jLTargetPath, gbc);
-	    einstellungen.add(jLMinHeightWidth, gbc);
-	    einstellungen.add(jLMaxScaleHeightWidth, gbc);
+	    einstellungen.add(jLMinWidthHeight, gbc);
+	    einstellungen.add(jLMaxScaleWidthHeight, gbc);
 	    einstellungen.add(jLTextSize, gbc);
 	    
 	    c.gridx = 2;
@@ -119,8 +119,8 @@ public class ControlComponent extends JPanel {
 		
 	    jLPhotoAlbumPath.setText(Specs.photoAlbumPath);
 	    jLTargetPath.setText(Specs.targetPath);
-	    jLMinHeightWidth.setText(Specs.minHeight + "x" + Specs.minWidth);
-	    jLMaxScaleHeightWidth.setText(Specs.maxScaleHeight + "x" + Specs.maxScaleWidth);
+	    jLMinWidthHeight.setText(Specs.minWidth + "x" + Specs.minHeight);
+	    jLMaxScaleWidthHeight.setText(Specs.maxScaleWidth + "x" + Specs.maxScaleHeight);
 	    jLTextSize.setText(Integer.toString(Specs.textSize));
 	}
 }
