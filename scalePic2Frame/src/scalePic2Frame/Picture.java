@@ -496,12 +496,33 @@ public class Picture {
 		while(fm.stringWidth(comment) > this.targetBi.getWidth() - 20) {
 			
 			/*
+			 * Wir brechen aus der Schleife aus, wenn es keine Whitespace Character mehr gibt
+			 */
+			if (!comment.matches(".*\\s.*")) {
+				break;
+			}
+			
+			/*
 			 * Wir kürzen so lange ganze Wörter weg, bis es passt
 			 */
 			comment = comment.replaceAll("(.*)\\s.*", "$1");
 			comment = comment + "...";
-			
 		}
+		
+		/*
+		 * Erneut Prüfen, ob der Kommentar jetzt auf das Bild passt
+		 */
+		while(fm.stringWidth(comment) > this.targetBi.getWidth() - 20 && comment.length() > 5) {
+			
+			/*
+			 * Jetzt geht es ans Eingemachte, wir nehmen jeden einzelnen Buchstaben 
+			 * nacheinander weg
+			 */
+			comment = comment.substring(0, comment.length()-4);
+			comment = comment + "...";
+		}
+		
+		
 
 		return comment;
 	}
