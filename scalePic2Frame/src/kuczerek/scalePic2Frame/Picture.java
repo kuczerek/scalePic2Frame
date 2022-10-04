@@ -1,4 +1,4 @@
-package scalePic2Frame;
+package kuczerek.scalePic2Frame;
 
 import java.awt.Color;
 import java.awt.Graphics2D;

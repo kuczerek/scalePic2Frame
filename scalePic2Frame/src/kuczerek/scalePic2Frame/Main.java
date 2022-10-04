@@ -1,4 +1,4 @@
-package scalePic2Frame;
+package kuczerek.scalePic2Frame;
 
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;

@@ -1,4 +1,4 @@
-package scalePic2Frame;
+package kuczerek.scalePic2Frame;
 
 import java.io.IOException;
 import java.nio.file.FileSystem;
