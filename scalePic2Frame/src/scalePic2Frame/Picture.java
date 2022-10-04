@@ -31,7 +31,6 @@ import com.drew.metadata.Metadata;
 import com.drew.metadata.exif.ExifIFD0Directory;
 import com.drew.metadata.exif.ExifSubIFDDirectory;
 import com.drew.metadata.jpeg.JpegCommentDirectory;
-//import com.drew.metadata.jpeg.JpegCommentDirectory;
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
 
@@ -414,13 +413,14 @@ public class Picture {
 	     */
 	    
 	    String commentMetaData = new String();
-	    if (commentExifSubIFD != null && !commentExifSubIFD.isEmpty() ) {
+	    if (commentJpegComment != null && !commentJpegComment.isEmpty() ) {
 			/*
-			 * Es gibt einen Kommentar in den EXIF Daten, den legen wir jetzt für die
-			 * Weitervarbeitung in commentMetaData
+			 * Es gibt einen Kommentar in den JPG Daten, den legen wir jetzt für die
+			 * Weitervarbeitung in commentMetaData. Den Kommentartyp haben wir auch
+			 * im Perl Skript genutzt.
 			 */
-			currentCommentSource = COMMENTSOURCE_EXIF;
-			commentMetaData = commentExifSubIFD;
+			currentCommentSource = COMMENTSOURCE_JPEG;
+			commentMetaData = commentJpegComment;
 		}
 		
 		
