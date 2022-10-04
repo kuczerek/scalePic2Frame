@@ -391,7 +391,7 @@ public class Picture {
 
 	    //Kommentar aus jpegCommentDirectory
 	    if (this.jpegCommentDirectory != null) {
-			commentJpegComment = this.jpegCommentDirectory.getString(JpegCommentDirectory.TAG_COMMENT);
+			commentJpegComment = this.jpegCommentDirectory.getString(JpegCommentDirectory.TAG_COMMENT, "UTF-8");
 			if (commentJpegComment != null) {
 				commentJpegComment = commentJpegComment.trim();
 			}
