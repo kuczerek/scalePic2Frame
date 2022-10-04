@@ -370,7 +370,9 @@ public class Picture {
 	    //EXIF Datum aus exifSubIFDDirectory
 	    if (this.exifSubIFDDirectory != null) {
 			Date dateExifSubIFD = this.exifSubIFDDirectory.getDate(ExifSubIFDDirectory.TAG_DATETIME_ORIGINAL);
-			localDateExifSubIFD = dateExifSubIFD.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+			if (dateExifSubIFD != null) {
+				localDateExifSubIFD = dateExifSubIFD.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+			}
 		}
 	    
 	    //Kommentar aus exifSubIFDDirectory
