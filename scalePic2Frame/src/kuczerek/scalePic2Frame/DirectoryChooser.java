@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.swing.JFileChooser;
@@ -47,6 +48,7 @@ public class DirectoryChooser {
 					e.printStackTrace();
 				}
 		    }
+		    Collections.sort(allFiles);
 	    }	    
 	    return allFiles;
 	}
