@@ -9,5 +9,6 @@
 	<classpathentry kind="lib" path="lib/metadata-extractor-2.18.0.jar"/>
 	<classpathentry kind="lib" path="lib/xmpcore-6.1.11.jar"/>
 	<classpathentry kind="lib" path="res"/>
+	<classpathentry kind="lib" path="lib/lablib-checkboxtree-4.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

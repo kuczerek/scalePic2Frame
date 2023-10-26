@@ -11,6 +11,11 @@ import javax.swing.JFileChooser;
 
 public class DirectoryChooser {
 	
+	/**
+	 * Dialog zur Auswahl von Verzeichnissen. Durchsucht die markierten Verzeichnisse nach Dateien mit der Endung "jpg|jpeg" und
+	 * liefert diese in einer ArrayList zurück 
+	 */
+	
 	public ArrayList<Path> getChosenDirectories () {
 		    
 		ArrayList<Path> allFiles = new ArrayList<Path>();	
@@ -30,7 +35,7 @@ public class DirectoryChooser {
 		    for (File selectedDirectory : selectedDirectories) {
 		        
 		        Path startDir = selectedDirectory.toPath();
-		        String searchPattern = "*.{jpg}";;
+		        String searchPattern = "*.{jpg,jpeg}";
 		        boolean searchInFile = false;
 		        List<Path> result;
 

@@ -12,6 +12,7 @@ import java.awt.FontFormatException;
 import java.awt.FontMetrics;
 import java.awt.font.TextAttribute;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -23,6 +24,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Hashtable;
+import java.util.Properties;
 
 import javax.imageio.ImageIO;
 
@@ -36,6 +38,10 @@ import com.drew.imaging.ImageProcessingException;
 
 public class Picture {
 	
+	/**
+	 * Führt die gesamte Manipulation der Bilder durch. 
+	 */
+	
 	private File sourceFile;
 	private BufferedImage targetBi;
 	private BufferedImage origBi;
@@ -47,22 +53,38 @@ public class Picture {
 	private int currentCommentSource;
 	private String comment;
 	private String skipInfo;
+	private String exceptionMessage;
+	private static String lastSourcePath ;
+	private static String lastCommentFromProperty;
+	private static LocalDate lastLocalDateFromProperty;
 	
 	public static final int DATESOURCE_EXIF = 1;
 	public static final int DATESOURCE_DIRECTORY = 2;
 	public static final int DATESOURCE_FILE = 3;
+	public static final int DATESOURCE_PROPERTY = 4;
 	public static final int COMMENTSOURCE_EXIF = 1;
 	public static final int COMMENTSOURCE_DIRECTORYONLY = 2;
-	public static final int COMMENTSOURCE_JPEG = 3;
+	public static final int COMMENTSOURCE_PROPERTYONLY = 3;
+	public static final int COMMENTSOURCE_DIRECTORY_JPEG= 4;
+	public static final int COMMENTSOURCE_PROPERTY_JPEG = 5;
+	public static final int COMMENTSOURCE_JPEG = 6;
 	
 
 	public Picture(File sourceFile) {
+
+		currentDateSource = 0;
+		currentCommentSource = 0;
+		comment = new String();
+		skipInfo = new String();
+		exceptionMessage = new String();
+		
 		this.sourceFile = sourceFile;
 		
 		BufferedImage origBi = null;
 		try {
 			origBi = ImageIO.read(this.sourceFile);
 		} catch (IOException e1) {
+			exceptionMessage = e1.getMessage();
 			e1.printStackTrace();
 		}
 		this.origBi = origBi;
@@ -79,15 +101,15 @@ public class Picture {
 		this.exifSubIFDDirectory = metadata.getFirstDirectoryOfType(ExifSubIFDDirectory.class);
 		this.jpegCommentDirectory = metadata.getFirstDirectoryOfType(JpegCommentDirectory.class);
 		
-		currentDateSource = 0;
-		currentCommentSource = 0;
-		comment = new String();
-		skipInfo = new String();
 	}
 
 	public boolean shouldWeProcessPicture () {
 		
-		if (this.origBi.getHeight() <= Specs.minHeight) {
+		if (this.origBi ==  null) {
+			//Bild konnte nicht gelesen werden
+			skipInfo = "Fehler: " + exceptionMessage;
+			return false;
+		} else if (this.origBi.getHeight() <= Specs.minHeight) {
 			//Bild ist zu klein
 			skipInfo = "Übersprungen, das Bild ist zu klein.";
 			return false;
@@ -301,15 +323,37 @@ public class Picture {
 	
 	private String createCommentString(FontMetrics fm) {
 		
+		/*
+		 * Der Kommentar auf den Bildern ist aus drei Teilen zusammengesetzt
+		 * (1) Verzeichnisname - (2) Beschriftung des Bildes in EXIF Daten - (3) Datum
+		 * 
+		 * Zu (1): 
+		 * Der Verzeichnisname wird aus dem Pfad des Bildes ausgelesen. Dabei wird angenommen,
+		 * dass der Pfad dem Muster 'JJJJ-MM-TT Titel des Albums' folgt. Als Verzeichnisname
+		 * wird dabei der String 'Titel des Albums' extrahiert
+		 * 
+		 * Zu (2):
+		 * Wird in den Metadaten ein weitere Kommentar als Bildbeschriftung gefunden, wird der
+		 * Verzeichnisname um den Medatendatenkommentar ergänzt. Dieser Schritt enfällt, wenn kein
+		 * Metadeaten Kommentar vorhanden ist.
+		 * 
+		 * Zu (3):
+		 * Das angehängte Datum wird auf mehreren Wegen ermittelt. Wird in den EXIF Daten ein Datum
+		 * gefunden nehmen wir dies, find wir dort keines, nehmen wir das Datum welches in (1) enthalten
+		 * ist, finden wir dort auch keines, dann das letzte Ändeurngsdatum der DAtei.
+		 */
+		
 		String comment;
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 		String commentJpegComment = null;
 		String commentExifIFD0 = null;
 		String commentExifSubIFD = null;
 		String commentFromPath = null;
+		String commentFromProperty = null;
 		LocalDate localDateExifSubIFD = null;
 		LocalDate localDateDirString = null;
 		LocalDate localDateFileCreation = null;
+		LocalDate localDateFromProperty = null;
 
 		/*
 		 * Wir holen erstmal ein paar Daten aus dem Dateisystem,
@@ -334,22 +378,61 @@ public class Picture {
 			 * Datum zwischenspeichern, falls wir das noch für die Beschriftung brauchen
 			 */
 			String dateString = path.getName(path.getNameCount() - 2).toString();
+			
+			
+			
 			dateString = dateString.replaceAll("^([\\d\\-\\s]{10,11}).*", "$1");
-			String[] dateStringSplitted = dateString.split("-");
-			
-			int jahr = Integer.parseInt(dateStringSplitted[0].trim());
-			int monat = Integer.parseInt(dateStringSplitted[1].trim());
-			int tag = Integer.parseInt(dateStringSplitted[2].trim());
-			
-			/*
-			 * Wir machen daraus ein Datum, wenn Tag und Monat nicht 0 sind
-			 */
-			if (monat > 0 && tag > 0) {
-				localDateDirString = LocalDate.of(jahr, monat, tag);
-			}
+			localDateDirString = createDatefromString(dateString);
 			
 		}
 		commentFromPath = commentFromPath.trim();
+		
+		/*
+		 * Wir checken, ob es eine property Datei im zu verarbeitenden Verzeichnis gibt,
+		 * welche die Verzeichnisdaten überschreibt
+		 * 
+		 * Dabei checken wir nicht jedesmal auf eine Property Datei, um Zugriffszeit zu sparen. Wenn
+		 * der Dateipfad gegenüber dem vorherigen durchgang gleich geblieben ist, holen wir uns die 
+		 * Daten aus statischen Variablen
+		 */
+		
+		if (path.getParent().toString().equals(lastSourcePath)) {
+			commentFromProperty = lastCommentFromProperty;
+			localDateFromProperty = lastLocalDateFromProperty;
+		}
+		else {
+			File propertyFile = new File(path.getParent().toString() + File.separator +  "scalePicFrame.properties");
+			if (propertyFile.exists()) {
+				Properties props = new Properties();
+				try {
+					props.load(new FileInputStream(propertyFile));
+				} catch (Exception e) {
+					//do Nothing
+				}
+				
+				//OK, wir haben eine Property Datei und lesen den zu überschreibenen Verzeichnisnamen aus
+				commentFromProperty = props.getProperty("VerzeichnisNameUeberschreiben", "");
+				if (commentFromProperty.equals("")) {
+					commentFromProperty = null;
+				} else {
+					commentFromProperty = commentFromProperty.trim();
+					
+					//Speichern der Daten in der static Variable für den nächsten Durchlauf
+					lastCommentFromProperty = commentFromProperty;
+				}
+				
+				//und das überschreibende Verzechnisdatum
+				String dateStringFromProperty = props.getProperty("VerzeichnisDatumUeberschreiben", "");
+				if (!dateStringFromProperty.equals("")) {
+					dateStringFromProperty = dateStringFromProperty.trim();
+					localDateFromProperty = createDatefromString(dateStringFromProperty);
+					
+					//Speichern der Daten in der static Variable für den nächsten Durchlauf
+					lastLocalDateFromProperty = localDateFromProperty;
+				}					
+			}
+		}
+		lastSourcePath = path.getParent().toString();
 		
 		/*
 		 * Datum aus dem cDate der Bilddatei extrahieren
@@ -404,14 +487,22 @@ public class Picture {
 		 */    
 		
 		/*
-		 * Wir beladen den Kommentar mit den Verzechnisdaten vor
+		 * Wir beladen den Kommentar mit den Verzeichnisdaten vor
 		 */
-		comment = new String(commentFromPath);
-		currentCommentSource = COMMENTSOURCE_DIRECTORYONLY;
-		
+	    
+	    //Wenn Verzeichnisdaten aus einer Property Datei vorhanden sind, dann nehmen wir diese, 
+	    //statt des echten Verzeichnisses
+	    if (commentFromProperty != null) {
+	    	comment = new String (commentFromProperty);
+	    	currentCommentSource = COMMENTSOURCE_PROPERTYONLY;
+	    } else {
+			comment = new String(commentFromPath);
+			currentCommentSource = COMMENTSOURCE_DIRECTORYONLY;
+	    }
+	    
 	    /*
-	     * Welches Datum wollen wir jetzt für das Bild nehmen?
-	     * Wir entscheiden uns für das commentExifSubIFD Kommentar
+	     * Welchen Kommentar wollen wir jetzt für das Bild nehmen?
+	     * Wir entscheiden uns für den JPG Kommentar
 	     */
 	    
 	    String commentMetaData = new String();
@@ -421,7 +512,13 @@ public class Picture {
 			 * Weitervarbeitung in commentMetaData. Den Kommentartyp haben wir auch
 			 * im Perl Skript genutzt.
 			 */
-			currentCommentSource = COMMENTSOURCE_JPEG;
+	    	
+	    	switch (currentCommentSource) {
+	    	case COMMENTSOURCE_PROPERTYONLY:
+	    		currentCommentSource = COMMENTSOURCE_PROPERTY_JPEG;
+	    	case COMMENTSOURCE_DIRECTORYONLY:
+	    		currentCommentSource = COMMENTSOURCE_DIRECTORY_JPEG;
+	    	}
 			commentMetaData = commentJpegComment;
 		}
 		
@@ -440,9 +537,15 @@ public class Picture {
 			 */
 			currentDateSource = DATESOURCE_EXIF;
 			comment = comment + " am " + localDateExifSubIFD.format(formatter);
+		} else if ( localDateFromProperty != null ){
+			/*
+			 * Es gibt offenbar kein Datum in den EXIF Daten, dann nehmen wir das Datum aus der Property Datei
+			 */
+			currentDateSource = DATESOURCE_PROPERTY;
+			comment = comment + " am " + localDateFromProperty.format(formatter);
 		} else if ( localDateDirString != null ){
 			/*
-			 * Es gibt offenbar kein Datum in den EXIF Daten, dann nehmen wir das Datum aus dem Verzeichnisnamen
+			 * Es gibt offenbar kein Datum aus einer Property, dann nehmen wir das Datum aus dem Verzeichnisnamen
 			 */
 			currentDateSource = DATESOURCE_DIRECTORY;
 			comment = comment + " am " + localDateDirString.format(formatter);
@@ -536,8 +639,9 @@ public class Picture {
 	
 	public String getTargetPicturePath() {		
 		
-		Path path = sourceFile.toPath();
-		File targetPicture = new File(path.getName(path.getNameCount() - 2).toString() + File.separator + sourceFile.getName());
+		String strPath = sourceFile.toPath().getParent().toString().substring(Specs.photoAlbumPath.length());;
+		strPath = strPath.replace("\\", "---");
+		File targetPicture = new File(Specs.targetPath + File.separator + strPath + File.separator + sourceFile.getName());
 		
 		return targetPicture.toPath().toString();
 	}
@@ -598,8 +702,9 @@ public class Picture {
 	
 	public void savePicture () {
 		
-		Path path = sourceFile.toPath();
-		File targetPicture = new File(Specs.targetPath + File.separator + path.getName(path.getNameCount() - 2).toString() + File.separator + sourceFile.getName());
+		String strPath = sourceFile.toPath().getParent().toString().substring(Specs.photoAlbumPath.length());;
+		strPath = strPath.replace("\\", "---");
+		File targetPicture = new File(Specs.targetPath + File.separator + strPath + File.separator + sourceFile.getName());
 		targetPicture.mkdirs();
 		
         BufferedImage convertedImg = new BufferedImage(this.targetBi.getWidth(), this.targetBi.getHeight(), BufferedImage.TYPE_3BYTE_BGR);
@@ -611,5 +716,23 @@ public class Picture {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}	
+	}
+	
+	private LocalDate createDatefromString(String dateString) {
+		
+		String[] dateStringSplitted = dateString.split("-");
+		
+		int jahr = Integer.parseInt(dateStringSplitted[0].trim());
+		int monat = Integer.parseInt(dateStringSplitted[1].trim());
+		int tag = Integer.parseInt(dateStringSplitted[2].trim());
+		
+		/*
+		 * Wir machen daraus ein Datum, wenn Tag und Monat nicht 0 sind
+		 */
+		if (monat > 0 && tag > 0) {
+			return LocalDate.of(jahr, monat, tag);
+		} else {		
+			return null;
+		}
 	}
 }

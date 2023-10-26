@@ -12,7 +12,11 @@ import javax.swing.border.EmptyBorder;
 public class ControlComponent extends JPanel {
 	
 	/**
+	 * Die Klasse erzeugt ein JPanel, welches im oberen Teil des Fensters angezeigt wird. Hierdrin befinden sich die Button
+	 * zum um Verzeichnisse zum Verarbeiten auszuwählen, sowie ein Button um die Einstellungen zu ändern.
+	 * Darüber hinaus werden die aktuellen Einstellungen aus kuczerek.scalePic2Frame.Specs ausgegeben
 	 * 
+	 * Wird instanziert von Desktop
 	 */
 	private static final long serialVersionUID = -6764173087459147523L;
 	public final static String BUT_VERZ_LABEL = "Verzeichnisse zur Fotoskalierung auswählen";

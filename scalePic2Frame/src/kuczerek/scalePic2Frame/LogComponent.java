@@ -13,7 +13,10 @@ import javax.swing.table.DefaultTableModel;
 
 public class LogComponent extends JPanel {
     /**
+	 * Die Klasse erzeugt ein JPanel, welches im mittleren Teil des Fensters angezeigt wird. Hier werden alle LogAusgaben der
+	 * Verarbeitung dargestellt und erzeugt
 	 * 
+	 * Wird instanziert von Desktop
 	 */
 	private static final long serialVersionUID = -7492857679540435978L;
 	private DefaultTableModel dtm;
@@ -83,6 +86,9 @@ public class LogComponent extends JPanel {
 	    case Picture.DATESOURCE_FILE:
 	    	dateSourceString = "Datei";
 	        break;
+	    case Picture.DATESOURCE_PROPERTY:
+	    	dateSourceString = "Property";
+	        break;
 	    default:
 	    	dateSourceString = "";
 		}
@@ -96,6 +102,15 @@ public class LogComponent extends JPanel {
 	        break;
 	    case Picture.COMMENTSOURCE_DIRECTORYONLY:
 	    	commentSourceString = "Verzeichnis";
+	        break;
+	    case Picture.COMMENTSOURCE_PROPERTYONLY:
+	    	commentSourceString = "Property";
+	        break;
+	    case Picture.COMMENTSOURCE_DIRECTORY_JPEG:
+	    	commentSourceString = "Verzeichnis + JPEG";
+	        break;
+	    case Picture.COMMENTSOURCE_PROPERTY_JPEG:
+	    	commentSourceString = "Property + JPEG";
 	        break;
 	    default:
 	    	commentSourceString = "";

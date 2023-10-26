@@ -21,7 +21,16 @@ import javax.swing.border.EmptyBorder;
 public class Desktop extends JFrame implements ActionListener {
 	
 	/**
-	 * 
+	 * Baut das Hauptfenster auf und wird von kuczerek.scalePic2Frame.Process instanziert. Das Hauptfenster besteht aus
+	 * drei Komponenten: 
+	 *  - JPanel controlComp in Form von kuczerek.scalePic2Frame.ControlComponent
+	 *  - JPanel logComp in Form von kuczerek.scalePic2Frame.LogComponent
+	 *  - JPanel previewComp in Form von javax.Swing.JPanel
+	 *  
+	 *  showWindow zeichnet das Fenster, mit drei weiteren Methoden werden die LogEinträge während der Bildverarbeitung geschrieben,
+	 *  sowie durch eine weitere Methode die Bildvorschau aktualisiert. 
+	 *  Im Eventlistener für den DirectoryChooser wird auf kuczerek.scalePic2Frame.Process "zurückgesprungen" und die Verarbeitung
+	 *  für alle Bilder angestoßen
 	 */
 	private static final long serialVersionUID = 5482877999870934340L;
 	private ControlComponent controlComp;
@@ -116,6 +125,9 @@ public class Desktop extends JFrame implements ActionListener {
 			ArrayList<Path> allFiles;
 			
 			DirectoryChooser dc = new DirectoryChooser();
+			//DirectoryChooser2 dc = new DirectoryChooser2();
+			//dc.showExampleTree();
+			
 			allFiles = dc.getChosenDirectories();
 			
 			if (allFiles != null) {

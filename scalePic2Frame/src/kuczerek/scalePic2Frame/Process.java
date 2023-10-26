@@ -7,6 +7,14 @@ import java.util.ListIterator;
 
 public class Process {
 	
+	/**
+	 * Hauptklasse, in der der die Verarbeitung der Bildskallierung gesteuert wird. 
+	 * - mit start() wird das Hauptfenster repräsentiert durch kuczerek.scalePic2Frame.Desktop aufgebaut.
+	 * - mit processAllFiles() wird ein neuer Thread eröffnet, in welchem jedes einzelene Bild aus der übergebenen
+	 *   Arrylist verarbeitet wird und gleichzeitig Log-Ausgaben auf den Desktop geschrieben werden.
+	 * 
+	 */
+	
 	private Desktop desktop;
 	
 	public Process() {

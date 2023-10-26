@@ -21,7 +21,8 @@ import javax.swing.text.NumberFormatter;
 public class ChangeSettings extends JFrame implements ActionListener{
 	
 	/**
-	 * 
+	 * Die Klasse erzeugt einen JFrame, um die Grundeinsstellungen für kuczerek.scalePic2Frame.Specs
+	 * anzupassen.
 	 */
 	private static final long serialVersionUID = 1064574073584749978L;
 
