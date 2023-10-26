@@ -516,8 +516,10 @@ public class Picture {
 	    	switch (currentCommentSource) {
 	    	case COMMENTSOURCE_PROPERTYONLY:
 	    		currentCommentSource = COMMENTSOURCE_PROPERTY_JPEG;
+	    		break;
 	    	case COMMENTSOURCE_DIRECTORYONLY:
 	    		currentCommentSource = COMMENTSOURCE_DIRECTORY_JPEG;
+	    		break;
 	    	}
 			commentMetaData = commentJpegComment;
 		}
