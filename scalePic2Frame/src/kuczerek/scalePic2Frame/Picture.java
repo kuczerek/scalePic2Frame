@@ -45,6 +45,7 @@ public class Picture {
 	private File sourceFile;
 	private BufferedImage targetBi;
 	private BufferedImage origBi;
+	private Metadata metadata;
 	private ExifIFD0Directory exifIFD0Directory;
 	private ExifSubIFDDirectory exifSubIFDDirectory;
 	private JpegCommentDirectory jpegCommentDirectory;
@@ -92,21 +93,27 @@ public class Picture {
 		Metadata metadata = null;
 		try {
 			metadata = ImageMetadataReader.readMetadata(this.sourceFile);
+			this.exifIFD0Directory = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
+			this.exifSubIFDDirectory = metadata.getFirstDirectoryOfType(ExifSubIFDDirectory.class);
+			this.jpegCommentDirectory = metadata.getFirstDirectoryOfType(JpegCommentDirectory.class);
 		} catch (ImageProcessingException e) {
+			exceptionMessage = e.getMessage();
 			e.printStackTrace();
 		} catch (IOException e) {
+			exceptionMessage = e.getMessage();
 			e.printStackTrace();
 		}
-		this.exifIFD0Directory = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
-		this.exifSubIFDDirectory = metadata.getFirstDirectoryOfType(ExifSubIFDDirectory.class);
-		this.jpegCommentDirectory = metadata.getFirstDirectoryOfType(JpegCommentDirectory.class);
-		
+		this.metadata = metadata;
 	}
 
 	public boolean shouldWeProcessPicture () {
 		
 		if (this.origBi ==  null) {
 			//Bild konnte nicht gelesen werden
+			skipInfo = "Fehler: " + exceptionMessage;
+			return false;
+		} else if (this.metadata ==  null) {
+			//Metadaten konnten nicht gelesen werden
 			skipInfo = "Fehler: " + exceptionMessage;
 			return false;
 		} else if (this.origBi.getHeight() <= Specs.minHeight) {
@@ -486,19 +493,25 @@ public class Picture {
 		 * Zusammenbau des vollen Kommentars
 		 */    
 		
-		/*
-		 * Wir beladen den Kommentar mit den Verzeichnisdaten vor
-		 */
+		
+	    /*
+	     * Wenn Verzeichnisdaten aus einer Property Datei vorhanden sind, dann nehmen wir diese,
+	     * statt des echten Verzeichnisses 
+	     */
 	    
-	    //Wenn Verzeichnisdaten aus einer Property Datei vorhanden sind, dann nehmen wir diese, 
-	    //statt des echten Verzeichnisses
+	    String commentVerzData;
 	    if (commentFromProperty != null) {
-	    	comment = new String (commentFromProperty);
+	    	commentVerzData = new String (commentFromProperty);
 	    	currentCommentSource = COMMENTSOURCE_PROPERTYONLY;
 	    } else {
-			comment = new String(commentFromPath);
+	    	commentVerzData = new String(commentFromPath);
 			currentCommentSource = COMMENTSOURCE_DIRECTORYONLY;
 	    }
+	    
+	    /*
+		 * Wir beladen den Kommentar mit den Verzeichnisdaten vor
+		 */
+	    comment = new String(commentVerzData);
 	    
 	    /*
 	     * Welchen Kommentar wollen wir jetzt für das Bild nehmen?
@@ -571,7 +584,7 @@ public class Picture {
 			if (commentMetaData != null && !commentMetaData.isEmpty() ) {
 				comment = new String(commentMetaData);
 			} else {
-				comment = new String(commentFromPath);
+				comment = new String(commentVerzData);
 			}
 			if (localDateExifSubIFD != null) {
 				comment = comment + " am " + localDateExifSubIFD.format(formatter);
@@ -593,7 +606,7 @@ public class Picture {
 			if (commentMetaData != null && !commentMetaData.isEmpty() ) {
 				comment = new String(commentMetaData);
 			} else {
-				comment = new String(commentFromPath);
+				comment = new String(commentVerzData);
 			}
 		}
 		
