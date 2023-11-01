@@ -4,11 +4,11 @@ import java.util.prefs.Preferences;
 
 public class Specs {
 	
-	public static int maxScaleHeight =  768;
-	public static int maxScaleWidth =  1024;
+	public static int maxScaleHeight =  1200;
+	public static int maxScaleWidth =  1920;
 	public static int minHeight = 550;
 	public static int minWidth = 550;
-	public static int textSize = 30;
+	public static int textSize = 50;
 	public static String photoAlbumPath = "P:\\2022\\2022-08-10 Bildertest für Schnuckihase";
 	public static String targetPath = "C:\\Users\\indy\\tmp";
 	
