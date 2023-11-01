@@ -29,8 +29,9 @@ public class LogComponent extends JPanel {
 	  JTable logTable = new JTable();
 	  logTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 	  dtm = new DefaultTableModel(0, 0);
-	  //Spalten                            0         1        2           3          4       5           6            7               8                  9
+
 	  //String header[] = new String[] { "Anzahl", "Quelle", "Größe", "Verhältnis", "Ziel", "Größe", "Verhältnis", "Datumquelle", "Kommentarquelle", "Beschriftung" };
+	  //Spalten                            0         1        2       3       4            5               6                  7               8                  9
 	  String header[] = new String[] { "Anzahl", "Quelle", "Größe", "Ziel", "Größe", "Datumquelle", "Kommentarquelle", "Beschriftung" };
 	  
 	  //add header in table model     
@@ -45,7 +46,7 @@ public class LogComponent extends JPanel {
 	  logTable.getColumnModel().getColumn(3).setPreferredWidth(520);
 	  logTable.getColumnModel().getColumn(4).setPreferredWidth(70);
 	  logTable.getColumnModel().getColumn(5).setPreferredWidth(70);
-	  logTable.getColumnModel().getColumn(6).setPreferredWidth(70);
+	  logTable.getColumnModel().getColumn(6).setPreferredWidth(110);
 	  logTable.getColumnModel().getColumn(7).setPreferredWidth(400);
 
 	  scrollPane = new JScrollPane(logTable);

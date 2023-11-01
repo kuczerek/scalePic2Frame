@@ -403,6 +403,7 @@ public class Picture {
 		 * Daten aus statischen Variablen
 		 */
 		
+		//System.out.println("Pic: " + path.toString() + " | Current: " + path.getParent().toString() + " | Last: " + lastSourcePath);
 		if (path.getParent().toString().equals(lastSourcePath)) {
 			commentFromProperty = lastCommentFromProperty;
 			localDateFromProperty = lastLocalDateFromProperty;
@@ -437,6 +438,12 @@ public class Picture {
 					//Speichern der Daten in der static Variable für den nächsten Durchlauf
 					lastLocalDateFromProperty = localDateFromProperty;
 				}					
+			} else {
+				//Keine Property Datei vorhanden, also alle Daten aus den Properties nullen
+				commentFromProperty = null;
+				localDateFromProperty = null;
+				lastCommentFromProperty = null;
+				lastLocalDateFromProperty = null;				
 			}
 		}
 		lastSourcePath = path.getParent().toString();
