@@ -27,8 +27,8 @@ public class Process {
 		desktop.showWindow();
 		
 		//Gleich mit dem Testverzeichnis durchstarten?
-		Path startDir = new File("P:\\Sonstiges\\scalePhotosTest\\Videotest").toPath();
-		desktop.chooseTestData(startDir);
+		//Path startDir = new File("P:\\Sonstiges\\scalePhotosTest\\Videotest").toPath();
+		//desktop.chooseTestData(startDir);
 	}
 	
 	public void processAllFiles(ArrayList<Path> allFiles) {
