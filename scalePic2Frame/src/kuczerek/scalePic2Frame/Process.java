@@ -1,5 +1,6 @@
 package kuczerek.scalePic2Frame;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.ListIterator;
@@ -23,7 +24,11 @@ public class Process {
 	public void start() {
 		
 		desktop = new Desktop(this);
-		desktop.showWindow();		
+		desktop.showWindow();
+		
+		//Gleich mit dem Testverzeichnis durchstarten?
+		Path startDir = new File("P:\\Sonstiges\\scalePhotosTest\\Videotest").toPath();
+		desktop.chooseTestData(startDir);
 	}
 	
 	public void processAllFiles(ArrayList<Path> allFiles) {
@@ -36,6 +41,7 @@ public class Process {
             public void run() {
             	
             	Picture pic;
+            	Video vid;
             	ListIterator<Path> it = allFiles.listIterator();
 
             	while(it.hasNext()) {
@@ -43,21 +49,41 @@ public class Process {
             		int current = it.nextIndex() + 1;
         	    	Path currentPath = it.next();
         	    	desktop.startLogEntry(currentPath.toString(), current, allFiles.size());
-    		    	pic = new Picture(currentPath.toFile());
-    		    	desktop.picLoadedLogEntry(pic.getSourcePictureWidth(), pic.getSourcePictureHeight());
-    				if (pic.shouldWeProcessPicture()) {
-    					pic.scalePicture();
-    					pic.orientPicture();
-    					pic.drawOnPicture();
-    					desktop.newPreviewPicture(pic.getTargetPicture());
-    					desktop.endLogEntry(pic.getTargetPicturePath(), pic.getTargetPictureWidth(), pic.getTargetPictureHeight(), pic.getDateSource(), pic.getCommentSource(), pic.getComment());
-    					pic.savePicture();
-    				} else {
-    					desktop.endLogEntry(pic.getSkipInfo(), pic.getTargetPictureWidth(), pic.getTargetPictureHeight(), pic.getDateSource(), pic.getCommentSource(), pic.getComment());
-    				}
+        	    	
+        	    	//Verarbeitung der Bilder
+        	    	if (currentPath.toString().toLowerCase().endsWith("jpg") || currentPath.toString().toLowerCase().endsWith("jpeg")) {
+        	    		
+	    		    	pic = new Picture(currentPath.toFile());
+	    		    	desktop.mediaLoadedLogEntry(pic.getSourcePictureWidth(), pic.getSourcePictureHeight());
+	    				if (pic.shouldWeProcessPicture()) {
+	    					pic.scalePicture();
+	    					pic.orientPicture();
+	    					pic.drawOnPicture();
+	    					desktop.newPreviewPicture(pic.getTargetPicture());
+	    					desktop.endLogEntry(pic.getTargetPicturePath(), pic.getTargetPictureWidth(), pic.getTargetPictureHeight(), pic.getDateSource(), pic.getCommentSource(), pic.getComment());
+	    					pic.savePicture();
+	    				} else {
+	    					desktop.endLogEntry(pic.getSkipInfo(), pic.getTargetPictureWidth(), pic.getTargetPictureHeight(), pic.getDateSource(), pic.getCommentSource(), pic.getComment());
+	    				}
+        	    	} else if (currentPath.toString().toLowerCase().endsWith("mp4")) {
+        	    		
+        	    		vid = new Video(currentPath.toFile());
+        	    		desktop.mediaLoadedLogEntry(vid.getSourceVideoWidth(), vid.getSourceVideoHeight());
+        	    		if (vid.shouldWeProcessVideo()) {
+        	    			vid.createComment();
+        	    			vid.generateScaleInformations();
+        	    			desktop.endLogEntry(vid.getTargetVideoPath(), vid.getTargetVideoWidth(), vid.getTargetVideoHeight(), vid.getDateSource(), vid.getCommentSource(), vid.getComment());
+        	    			desktop.newPreviewPicture(vid.getWorkingPicture());
+        	    			vid.saveVideo();
+        	    			desktop.newPreviewPicture(vid.getFinishedPicture());
+        	    		} else {
+        	    			desktop.endLogEntry(vid.getSkipInfo(), vid.getTargetVideoWidth(), vid.getTargetVideoHeight(), vid.getDateSource(), vid.getCommentSource(), vid.getComment());
+        	    		}
+        	    	}
         	    }
             }
         });         
 		scaleFiles.start();
 	}
+	
 }

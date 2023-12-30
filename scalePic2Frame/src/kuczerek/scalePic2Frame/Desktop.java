@@ -93,7 +93,7 @@ public class Desktop extends JFrame implements ActionListener {
 		repaint();
 	}
 	
-	public void picLoadedLogEntry(int width, int height) {
+	public void mediaLoadedLogEntry(int width, int height) {
 		logComp.picLoadedEntry(width, height);
 		validate();
 		repaint();
@@ -116,6 +116,18 @@ public class Desktop extends JFrame implements ActionListener {
 	
 	public void refillSpecData() {
 		controlComp.fillSpecLabels();
+	}
+	
+	public void chooseTestData(Path path) {
+		
+		ArrayList<Path> allFiles;
+		
+		DirectoryChooser dc = new DirectoryChooser();
+		allFiles = dc.getTestDirectory(path);
+		
+		if (allFiles != null) {
+			proc.processAllFiles(allFiles);
+		}
 	}
 
 	@Override

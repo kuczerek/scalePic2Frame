@@ -78,16 +78,16 @@ public class LogComponent extends JPanel {
 		String commentSourceString;
 		
 		switch (dateSource) {
-	    case Picture.DATESOURCE_EXIF:
+	    case MediaComment.DATESOURCE_EXIF:
 	    	dateSourceString = "EXIF";
 	        break;
-	    case Picture.DATESOURCE_DIRECTORY:
+	    case MediaComment.DATESOURCE_DIRECTORY:
 	    	dateSourceString = "Verzeichnis";
 	        break;
-	    case Picture.DATESOURCE_FILE:
+	    case MediaComment.DATESOURCE_FILE:
 	    	dateSourceString = "Datei";
 	        break;
-	    case Picture.DATESOURCE_PROPERTY:
+	    case MediaComment.DATESOURCE_PROPERTY:
 	    	dateSourceString = "Property";
 	        break;
 	    default:
@@ -95,22 +95,22 @@ public class LogComponent extends JPanel {
 		}
 		
 		switch (commentSource) {
-	    case Picture.COMMENTSOURCE_EXIF:
+	    case MediaComment.COMMENTSOURCE_EXIF:
 	    	commentSourceString = "EXIF";
 	        break;
-	    case Picture.COMMENTSOURCE_JPEG:
+	    case MediaComment.COMMENTSOURCE_JPEG:
 	    	commentSourceString = "JPEG";
 	        break;
-	    case Picture.COMMENTSOURCE_DIRECTORYONLY:
+	    case MediaComment.COMMENTSOURCE_DIRECTORYONLY:
 	    	commentSourceString = "Verzeichnis";
 	        break;
-	    case Picture.COMMENTSOURCE_PROPERTYONLY:
+	    case MediaComment.COMMENTSOURCE_PROPERTYONLY:
 	    	commentSourceString = "Property";
 	        break;
-	    case Picture.COMMENTSOURCE_DIRECTORY_JPEG:
+	    case MediaComment.COMMENTSOURCE_DIRECTORY_JPEG:
 	    	commentSourceString = "Verzeichnis + JPEG";
 	        break;
-	    case Picture.COMMENTSOURCE_PROPERTY_JPEG:
+	    case MediaComment.COMMENTSOURCE_PROPERTY_JPEG:
 	    	commentSourceString = "Property + JPEG";
 	        break;
 	    default:

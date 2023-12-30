@@ -11,6 +11,7 @@ public class Specs {
 	public static int textSize = 50;
 	public static String photoAlbumPath = "P:\\2022\\2022-08-10 Bildertest für Schnuckihase";
 	public static String targetPath = "C:\\Users\\indy\\tmp";
+	public static String ffmpegPath = "C:\\Program Files\\ffmpeg\\bin\\";
 	
 	private Preferences userPrefs;
 	
@@ -27,6 +28,7 @@ public class Specs {
 		textSize = userPrefs.getInt("textSize", 30);
 		photoAlbumPath = userPrefs.get("photoAlbumPath", "P:\\2022\\2022-08-10 Bildertest für Schnuckihase");
 		targetPath = userPrefs.get("targetPath", "C:\\Users\\indy\\tmp");
+		ffmpegPath = userPrefs.get("ffmpegPath", "C:\\Program Files\\ffmpeg\\bin\\");
 	}
 	
 	public void writeUserPreferences() {
@@ -38,6 +40,7 @@ public class Specs {
 		userPrefs.putInt("textSize", textSize);
 		userPrefs.put("photoAlbumPath", photoAlbumPath);
 		userPrefs.put("targetPath", targetPath);
+		userPrefs.put("ffmpegPath", ffmpegPath);
 	}
 	
 	

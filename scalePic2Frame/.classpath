@@ -10,5 +10,14 @@
 	<classpathentry kind="lib" path="lib/xmpcore-6.1.11.jar"/>
 	<classpathentry kind="lib" path="res"/>
 	<classpathentry kind="lib" path="lib/lablib-checkboxtree-4.0.jar"/>
+	<classpathentry kind="lib" path="lib/ffmpeg-0.8.0.jar"/>
+	<classpathentry kind="lib" path="lib/slf4j-api-2.0.9.jar"/>
+	<classpathentry kind="lib" path="lib/spotbugs-annotations-4.8.0.jar"/>
+	<classpathentry kind="lib" path="lib/error_prone_annotations-2.23.0.jar"/>
+	<classpathentry kind="lib" path="lib/guava-32.1.3-jre.jar"/>
+	<classpathentry kind="lib" path="lib/commons-io-2.15.0.jar"/>
+	<classpathentry kind="lib" path="lib/commons-lang3-3.13.0.jar"/>
+	<classpathentry kind="lib" path="lib/gson-2.10.jar"/>
+	<classpathentry kind="lib" path="lib/modelmapper-3.2.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

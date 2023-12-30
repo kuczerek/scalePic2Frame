@@ -34,9 +34,11 @@ public class ChangeSettings extends JFrame implements ActionListener{
 	JFormattedTextField jtfMinWidth;
 	JFormattedTextField jtfTextSize;
 	JLabel jtfPhotoAlbumPath;
-	JLabel jtfTargetPath;	
-	JButton JButPhotoAlbumPath;
-	JButton JButTargetPath;
+	JLabel jtfTargetPath;
+	JLabel jtfFfmpegPath;	
+	JButton jButPhotoAlbumPath;
+	JButton jButTargetPath;
+	JButton jButFfmpegPath;
 	
 	public ChangeSettings(Desktop desktop) {
 		this.desktop = desktop;
@@ -45,7 +47,7 @@ public class ChangeSettings extends JFrame implements ActionListener{
 	public void showWindow() {
 		
 		setTitle("Einstellungen");
-		setSize(650,250);
+		setSize(650,280);
 	    setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 	    Container pane = getContentPane();
 	    pane.setLayout(new BoxLayout(pane, BoxLayout.Y_AXIS));
@@ -66,6 +68,7 @@ public class ChangeSettings extends JFrame implements ActionListener{
 	    settings.add(createLabel("Schriftgröße"), gbc);
 	    settings.add(createLabel("Pfad zum Fotoalbum"), gbc);
 	    settings.add(createLabel("Zielpfad für die skalierten Bilder"), gbc);
+	    settings.add(createLabel("Programmverzeichnis für ffmpeg und ffprobe"), gbc);
 
 	    	    
 	    /*
@@ -79,8 +82,8 @@ public class ChangeSettings extends JFrame implements ActionListener{
 		jtfTextSize = buildIntegerTextFields();
 		jtfPhotoAlbumPath = new JLabel();
 		jtfTargetPath = new JLabel();
+		jtfFfmpegPath = new JLabel();
 		
-		;
 		
 		jtfMaxScaleWidth.setText(Integer.toString(Specs.maxScaleWidth));
 		jtfMaxScaleHeight.setText(Integer.toString(Specs.maxScaleHeight));
@@ -89,6 +92,7 @@ public class ChangeSettings extends JFrame implements ActionListener{
 		jtfTextSize.setText(Integer.toString(Specs.textSize));
 		jtfPhotoAlbumPath.setText(Specs.photoAlbumPath);
 		jtfTargetPath.setText(Specs.targetPath);
+		jtfFfmpegPath.setText(Specs.ffmpegPath);
 	    		
 		/*
 		 * Zweite Spalte zusammenbauen
@@ -147,17 +151,26 @@ public class ChangeSettings extends JFrame implements ActionListener{
 	    settings.add(jtfPhotoAlbumPath, gbc);
 	    gbc.gridx = 5;
 	    gbc.gridy = 3;
-	    JButPhotoAlbumPath = new JButton("Ändern");
-	    JButPhotoAlbumPath.addActionListener(this);
-	    settings.add(JButPhotoAlbumPath, gbc);
+	    jButPhotoAlbumPath = new JButton("Ändern");
+	    jButPhotoAlbumPath.addActionListener(this);
+	    settings.add(jButPhotoAlbumPath, gbc);
 	    gbc.gridx = 1;
 	    gbc.gridy = GridBagConstraints.RELATIVE;
 	    settings.add(jtfTargetPath, gbc);
 	    gbc.gridx = 5;
 	    gbc.gridy = 4;
-	    JButTargetPath = new JButton("Ändern");
-	    JButTargetPath.addActionListener(this);
-	    settings.add(JButTargetPath, gbc);
+	    jButTargetPath = new JButton("Ändern");
+	    jButTargetPath.addActionListener(this);
+	    settings.add(jButTargetPath, gbc);
+	    
+	    gbc.gridx = 1;
+	    gbc.gridy = GridBagConstraints.RELATIVE;
+	    settings.add(jtfFfmpegPath, gbc);
+	    gbc.gridx = 5;
+	    gbc.gridy = 5;
+	    jButFfmpegPath = new JButton("Ändern");
+	    jButFfmpegPath.addActionListener(this);
+	    settings.add(jButFfmpegPath, gbc);
 	    
 	    /*
 	     * Fußzeilen
@@ -196,6 +209,7 @@ public class ChangeSettings extends JFrame implements ActionListener{
 			Specs.textSize = Integer.parseInt(jtfTextSize.getText());
 			Specs.photoAlbumPath = jtfPhotoAlbumPath.getText();
 			Specs.targetPath = jtfTargetPath.getText();
+			Specs.ffmpegPath = jtfFfmpegPath.getText();
 			desktop.refillSpecData();
 			Specs specs = new Specs();
 			specs.writeUserPreferences();
@@ -206,7 +220,7 @@ public class ChangeSettings extends JFrame implements ActionListener{
 			this.dispose();			
 		}
 		
-		if (e.getSource() == JButPhotoAlbumPath){
+		if (e.getSource() == jButPhotoAlbumPath){
 			
 			JFileChooser chooser = new JFileChooser();
 			chooser.setDialogTitle("Ordner auswählen");
@@ -219,7 +233,7 @@ public class ChangeSettings extends JFrame implements ActionListener{
 		    }
 		}
 		
-		if (e.getSource() == JButTargetPath){
+		if (e.getSource() == jButTargetPath){
 			
 			JFileChooser chooser = new JFileChooser();
 			chooser.setDialogTitle("Ordner auswählen");
@@ -229,6 +243,19 @@ public class ChangeSettings extends JFrame implements ActionListener{
 		    int returnVal = chooser.showOpenDialog(null);
 		    if(returnVal == JFileChooser.APPROVE_OPTION) {
 		    	jtfTargetPath.setText(chooser.getSelectedFile().getAbsolutePath());
+		    }
+		}
+		
+		if (e.getSource() == jButFfmpegPath){
+			
+			JFileChooser chooser = new JFileChooser();
+			chooser.setDialogTitle("Ordner auswählen");
+			//chooser.setCurrentDirectory(dir);
+			chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+			chooser.setMultiSelectionEnabled(false);
+		    int returnVal = chooser.showOpenDialog(null);
+		    if(returnVal == JFileChooser.APPROVE_OPTION) {
+		    	jtfFfmpegPath.setText(chooser.getSelectedFile().getAbsolutePath());
 		    }
 		}
 		

@@ -35,7 +35,7 @@ public class DirectoryChooser {
 		    for (File selectedDirectory : selectedDirectories) {
 		        
 		        Path startDir = selectedDirectory.toPath();
-		        String searchPattern = "*.{jpg,jpeg}";
+		        String searchPattern = "*.{jpg,jpeg,mp4}";
 		        boolean searchInFile = false;
 		        List<Path> result;
 
@@ -56,5 +56,32 @@ public class DirectoryChooser {
 		    Collections.sort(allFiles);
 	    }	    
 	    return allFiles;
+	}
+	
+	public ArrayList<Path> getTestDirectory (Path startDir) {
+		
+		ArrayList<Path> allFiles = new ArrayList<Path>();
+        String searchPattern = "*.{jpg,jpeg,mp4}";
+        boolean searchInFile = false;
+        List<Path> result;
+
+        // Geht rekursiv durch alle Unterverzeichnisse
+        // Rekursion wird in der Methode walkFileTree() gemacht
+		try {
+			result = SearchFileVisitor.searchFor(startDir, searchPattern, searchInFile);
+			//System.out.println("Anzahl der Dateien: " + result.size());
+	        for(Path path : result)
+	        {
+	        	//System.out.println("Datei: " + path.toFile().getName());
+	        	allFiles.add(path);
+	        }
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		Collections.sort(allFiles);
+		
+		return allFiles;
+		
 	}
 }
