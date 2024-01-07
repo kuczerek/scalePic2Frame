@@ -19,6 +19,7 @@ import java.util.Properties;
 import com.drew.metadata.exif.ExifIFD0Directory;
 import com.drew.metadata.exif.ExifSubIFDDirectory;
 import com.drew.metadata.jpeg.JpegCommentDirectory;
+import com.drew.metadata.mp4.Mp4Directory;
 
 public class CommentCreator {
 
@@ -260,7 +261,7 @@ public class CommentCreator {
 		return mediaComment;
 	}
 	
-	public MediaComment createVidComment(BufferedImage targetBi, Graphics2D g2d) {
+	public MediaComment createVidComment(BufferedImage targetBi, Graphics2D g2d, Mp4Directory mp4Directory) {
 		
 		/*
 		 * Der Kommentar auf den Bildern ist aus drei Teilen zusammengesetzt
@@ -288,6 +289,7 @@ public class CommentCreator {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 		String commentFromPath = null;
 		String commentFromProperty = null;
+		LocalDate localDateMp4 = null;
 		LocalDate localDateDirString = null;
 		LocalDate localDateFileCreation = null;
 		LocalDate localDateFromProperty = null;
@@ -302,6 +304,9 @@ public class CommentCreator {
 		
 		//Datum aus dem cDate der Bilddatei extrahieren
 		localDateFileCreation = getDateFromFileCreation();
+		
+		//Datum aus dem MP4 Directory lesen
+		localDateMp4 = getDateFromMp4Meta(mp4Directory);
 		 
 		/*
 		 * Zusammenbau des vollen Kommentars
@@ -329,7 +334,13 @@ public class CommentCreator {
 	     * Datum anhängen
 	     */	
 
-	    if ( localDateFromProperty != null ){
+	    if ( localDateMp4 != null ){
+			/*
+			 * wir nehmen das Datum aus den MP4 Daten
+			 */
+			mediaComment.setDateSource(MediaComment.DATESOURCE_MP4);
+			mediaComment.addCommentBehindCurrent(" am " + localDateMp4.format(formatter));
+		} else if ( localDateFromProperty != null ){
 			/*
 			 * wir nehmen das Datum aus der Property Datei
 			 */
@@ -343,7 +354,7 @@ public class CommentCreator {
 			mediaComment.addCommentBehindCurrent(" am " + localDateDirString.format(formatter));
 		} else {
 			/*
-			 * Es gibt kein Datum aus den EXIF Daten und keines aus dem Verzeichnisnamen, wir nehmen das cDate
+			 * Es gibt kein Datum aus den META Daten und keines aus dem Verzeichnisnamen, wir nehmen das cDate
 			 */
 			mediaComment.setDateSource(MediaComment.DATESOURCE_FILE);
 			mediaComment.addCommentBehindCurrent(" am " + localDateFileCreation.format(formatter));
@@ -637,5 +648,25 @@ public class CommentCreator {
 		} else {		
 			return null;
 		}
+	}
+	
+	private LocalDate getDateFromMp4Meta(Mp4Directory mp4Directory) {
+		
+		LocalDate localDateMp4 = null;
+		
+	    if (mp4Directory != null) {
+			Date dateMp4 = mp4Directory.getDate(Mp4Directory.TAG_CREATION_TIME );
+			if (dateMp4 != null) {
+				localDateMp4 = dateMp4.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+				
+				//Wenn kein Datum gespeichert ist, wird offenbar 01.01.1904 geliefert. Wir machen
+				//daraus lieber null.
+				if (localDateMp4.isBefore(LocalDate.parse("1905-01-01"))) {
+					localDateMp4 = null;
+				}
+			}
+	    }
+	    
+	    return localDateMp4;
 	}
 }

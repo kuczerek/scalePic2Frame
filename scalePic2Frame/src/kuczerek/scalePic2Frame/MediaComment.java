@@ -6,6 +6,7 @@ public class MediaComment {
 	public static final int DATESOURCE_DIRECTORY = 2;
 	public static final int DATESOURCE_FILE = 3;
 	public static final int DATESOURCE_PROPERTY = 4;
+	public static final int DATESOURCE_MP4 = 5;
 	public static final int COMMENTSOURCE_EXIF = 1;
 	public static final int COMMENTSOURCE_DIRECTORYONLY = 2;
 	public static final int COMMENTSOURCE_PROPERTYONLY = 3;

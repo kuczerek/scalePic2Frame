@@ -283,7 +283,7 @@ public class Video {
 	        
 	    //Kommentar String erzeugen
 	    CommentCreator cc = new CommentCreator(this.sourceFile);
-	    MediaComment mc = cc.createVidComment(this.targetBi, g2d);
+	    MediaComment mc = cc.createVidComment(this.targetBi, g2d, mp4Directory);
 	    this.comment = mc.getComment();
 	    this.ffmpegComment = "drawbox=x=0:y=ih-" + Specs.textSize + "-10:w=iw:h=" + Specs.textSize + "+2:t=fill:color=white@0.53, "
 	      + "drawtext=text='" + mc.getComment() + "':"

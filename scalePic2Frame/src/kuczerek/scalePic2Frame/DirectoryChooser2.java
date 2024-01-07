@@ -50,14 +50,12 @@ public class DirectoryChooser2 extends JFrame {
     }       
     
     public void getList(DefaultMutableTreeNode node, File f) {
-        if(f.isDirectory()) {
-            System.out.println("DIRECTORY  -  " + f.getName());
-            DefaultMutableTreeNode child = new DefaultMutableTreeNode(f);
-            node.add(child);
-            File fList[] = f.listFiles();
-            for(int i = 0; i  < fList.length; i++)
-                getList(child, fList[i]);
-        }
+	    System.out.println("DIRECTORY  -  " + f.getName());
+	    DefaultMutableTreeNode child = new DefaultMutableTreeNode(f);
+	    node.add(child);
+	    File fList[] = f.listFiles(File::isDirectory);
+	    for(int i = 0; i  < fList.length; i++)
+	        getList(child, fList[i]);
     }
     
     private TreeNode createDemoTree(){
