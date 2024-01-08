@@ -35,7 +35,7 @@ public class DirectoryChooser {
 		    for (File selectedDirectory : selectedDirectories) {
 		        
 		        Path startDir = selectedDirectory.toPath();
-		        String searchPattern = "*.{jpg,jpeg,mp4}";
+		        String searchPattern = "*.{jpg,jpeg,mp4,mov,avi}";
 		        boolean searchInFile = false;
 		        List<Path> result;
 
@@ -61,7 +61,7 @@ public class DirectoryChooser {
 	public ArrayList<Path> getTestDirectory (Path startDir) {
 		
 		ArrayList<Path> allFiles = new ArrayList<Path>();
-        String searchPattern = "*.{jpg,jpeg,mp4}";
+        String searchPattern = "*.{jpg,jpeg,mp4,mov,avi}";
         boolean searchInFile = false;
         List<Path> result;
 

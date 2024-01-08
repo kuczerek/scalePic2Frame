@@ -65,7 +65,7 @@ public class Process {
 	    				} else {
 	    					desktop.endLogEntry(pic.getSkipInfo(), pic.getTargetPictureWidth(), pic.getTargetPictureHeight(), pic.getDateSource(), pic.getCommentSource(), pic.getComment());
 	    				}
-        	    	} else if (currentPath.toString().toLowerCase().endsWith("mp4")) {
+        	    	} else if (currentPath.toString().toLowerCase().endsWith("mp4") || currentPath.toString().toLowerCase().endsWith("mov") || currentPath.toString().toLowerCase().endsWith("avi")) {
         	    		
         	    		vid = new Video(currentPath.toFile());
         	    		desktop.mediaLoadedLogEntry(vid.getSourceVideoWidth(), vid.getSourceVideoHeight());

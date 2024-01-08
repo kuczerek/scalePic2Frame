@@ -73,9 +73,11 @@ public class Video {
 		
 		Metadata metadata = null;
 		try {
-			metadata = ImageMetadataReader.readMetadata(this.sourceFile);
-			this.mp4Directory = metadata.getFirstDirectoryOfType(Mp4Directory.class);
-			this.mp4VideoDirectory = metadata.getFirstDirectoryOfType(Mp4VideoDirectory.class);
+			if (!this.sourceFile.toString().toLowerCase().endsWith("mov")) {
+				metadata = ImageMetadataReader.readMetadata(this.sourceFile);
+				this.mp4Directory = metadata.getFirstDirectoryOfType(Mp4Directory.class);
+				this.mp4VideoDirectory = metadata.getFirstDirectoryOfType(Mp4VideoDirectory.class);	
+			}
 		} catch (ImageProcessingException e) {
 			exceptionMessage = e.getMessage();
 			e.printStackTrace();
@@ -100,11 +102,11 @@ public class Video {
 	
 	public boolean shouldWeProcessVideo () {
 		
-		if (this.metadata ==  null) {
+		if (this.ffmpegProbeResult ==  null) {
 			//Metadaten konnten nicht gelesen werden
 			skipInfo = "Fehler: " + exceptionMessage;
 			return false;
-		} else if ( this.ffmpegProbeResult ==  null) {
+		} else if ( !exceptionMessage.equals("")) {
 			//Metadaten konnten nicht gelesen werden
 			skipInfo = "Fehler: " + exceptionMessage;
 			return false;
@@ -115,7 +117,10 @@ public class Video {
 		
 		//Breite und Höhe vertauchen, wenn das Video gedreht ist
 		try {
-			if (this.mp4Directory.getInt(Mp4Directory.TAG_ROTATION) == 90 || this.mp4Directory.getInt(Mp4Directory.TAG_ROTATION) == -90) {
+			if (this.mp4Directory == null) {
+				height = this.ffmpegVideoStream.height;
+				width = this.ffmpegVideoStream.width;
+			} else if (this.mp4Directory.getInt(Mp4Directory.TAG_ROTATION) == 90 || this.mp4Directory.getInt(Mp4Directory.TAG_ROTATION) == -90) {
 				height = this.ffmpegVideoStream.width;
 				width = this.ffmpegVideoStream.height;
 			} else {
@@ -149,7 +154,12 @@ public class Video {
 		double calculatedOrientation = (double) height / (double) width;
 		
 		try {
-			orientation = this.mp4Directory.getInt(Mp4Directory.TAG_ROTATION);
+			if (this.mp4Directory == null ) {
+				orientation = 0;
+			}
+			else {
+				orientation = this.mp4Directory.getInt(Mp4Directory.TAG_ROTATION);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -355,7 +365,9 @@ public class Video {
 	public int getSourceVideoWidth() {
 		
 		try {
-			if (this.mp4Directory.getInt(Mp4Directory.TAG_ROTATION) == 90 || this.mp4Directory.getInt(Mp4Directory.TAG_ROTATION) == -90){
+			if (this.mp4Directory == null) {
+				return this.ffmpegVideoStream.width;
+			} else if (this.mp4Directory.getInt(Mp4Directory.TAG_ROTATION) == 90 || this.mp4Directory.getInt(Mp4Directory.TAG_ROTATION) == -90){
 				return this.ffmpegVideoStream.height;
 			} else {
 				return this.ffmpegVideoStream.width;
@@ -369,7 +381,9 @@ public class Video {
 	public int getSourceVideoHeight() {
 		
 		try {
-			if (this.mp4Directory.getInt(Mp4Directory.TAG_ROTATION) == 90 || this.mp4Directory.getInt(Mp4Directory.TAG_ROTATION) == -90){
+			if (this.mp4Directory == null) {
+				return this.ffmpegVideoStream.height;
+			} else if (this.mp4Directory.getInt(Mp4Directory.TAG_ROTATION) == 90 || this.mp4Directory.getInt(Mp4Directory.TAG_ROTATION) == -90){
 				return this.ffmpegVideoStream.width;
 			} else {
 				return this.ffmpegVideoStream.height;
@@ -453,7 +467,11 @@ public class Video {
 		double calculatedOrientation = (double) height / (double) width;
 		
 		try {
-			orientation = this.mp4Directory.getInt(Mp4Directory.TAG_ROTATION);
+			if (this.mp4Directory == null) {
+				orientation = 0;
+			} else {
+				orientation = this.mp4Directory.getInt(Mp4Directory.TAG_ROTATION);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -483,7 +501,11 @@ public class Video {
 		double calculatedOrientation = (double) height / (double) width;
 		
 		try {
-			orientation = this.mp4Directory.getInt(Mp4Directory.TAG_ROTATION);
+			if (this.mp4Directory == null) {
+				orientation = 0;
+			} else {
+				orientation = this.mp4Directory.getInt(Mp4Directory.TAG_ROTATION);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
