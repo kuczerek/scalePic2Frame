@@ -115,7 +115,7 @@ public class Video {
 		int height = 0;
 		int width = 0;
 		
-		//Breite und Höhe vertauchen, wenn das Video gedreht ist
+		//Breite und Höhe vertasuchen, wenn das Video gedreht ist
 		try {
 			if (this.mp4Directory == null) {
 				height = this.ffmpegVideoStream.height;
@@ -148,8 +148,8 @@ public class Video {
 
 	public void generateScaleInformations() {
 		
-		int height = this.ffmpegVideoStream.height;
-		int width = this.ffmpegVideoStream.width;
+		int height = getRawSourceVideoHeightFromAllFrameworks();
+		int width = getRawSourceVideoWidthFromAllFrameworks();
 		int orientation = 0;
 		double calculatedOrientation = (double) height / (double) width;
 		
@@ -269,7 +269,7 @@ public class Video {
 	public void createComment() {
 		
 		try {
-			this.targetBi = new BufferedImage(this.ffmpegVideoStream.width, this.ffmpegVideoStream.height, BufferedImage.TYPE_4BYTE_ABGR);
+			this.targetBi = new BufferedImage(getRawSourceVideoWidthFromAllFrameworks(), getRawSourceVideoHeightFromAllFrameworks(), BufferedImage.TYPE_4BYTE_ABGR);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -366,11 +366,11 @@ public class Video {
 		
 		try {
 			if (this.mp4Directory == null) {
-				return this.ffmpegVideoStream.width;
+				return getRawSourceVideoWidthFromAllFrameworks();
 			} else if (this.mp4Directory.getInt(Mp4Directory.TAG_ROTATION) == 90 || this.mp4Directory.getInt(Mp4Directory.TAG_ROTATION) == -90){
-				return this.ffmpegVideoStream.height;
+				return getRawSourceVideoHeightFromAllFrameworks();
 			} else {
-				return this.ffmpegVideoStream.width;
+				return getRawSourceVideoWidthFromAllFrameworks();
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -382,11 +382,11 @@ public class Video {
 		
 		try {
 			if (this.mp4Directory == null) {
-				return this.ffmpegVideoStream.height;
+				return getRawSourceVideoHeightFromAllFrameworks();
 			} else if (this.mp4Directory.getInt(Mp4Directory.TAG_ROTATION) == 90 || this.mp4Directory.getInt(Mp4Directory.TAG_ROTATION) == -90){
-				return this.ffmpegVideoStream.width;
+				return getRawSourceVideoWidthFromAllFrameworks();
 			} else {
-				return this.ffmpegVideoStream.height;
+				return getRawSourceVideoHeightFromAllFrameworks();
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -461,8 +461,8 @@ public class Video {
 		 * aber Orientation ist 0. Man muss also beide Fälle checken... 
 		 */
 		
-		int height = this.ffmpegVideoStream.height;
-		int width = this.ffmpegVideoStream.width;
+		int height = getRawSourceVideoHeightFromAllFrameworks();
+		int width = getRawSourceVideoWidthFromAllFrameworks();
 		int orientation = 0;
 		double calculatedOrientation = (double) height / (double) width;
 		
@@ -495,8 +495,8 @@ public class Video {
 		 * aber Orientation ist 0. Man muss also beide Fälle checken... 
 		 */
 		
-		int height = this.ffmpegVideoStream.height;
-		int width = this.ffmpegVideoStream.width;
+		int height = getRawSourceVideoHeightFromAllFrameworks();
+		int width = getRawSourceVideoWidthFromAllFrameworks();
 		int orientation = 0;
 		double calculatedOrientation = (double) height / (double) width;
 		
@@ -515,6 +515,63 @@ public class Video {
 			return true;
 		} else {
 			return false;
+		}
+	}
+	
+	private int getRawSourceVideoHeightFromAllFrameworks() {
+		
+		int ffmpegHeight = this.ffmpegVideoStream.height;
+		int mp4VideoDirectoryHeight;
+		
+		try {
+			if (this.mp4VideoDirectory == null) {
+				mp4VideoDirectoryHeight = 0;
+			} else {
+				mp4VideoDirectoryHeight = this.mp4VideoDirectory.getInt(Mp4VideoDirectory.TAG_HEIGHT);
+			}
+		} catch (MetadataException e1) {
+			mp4VideoDirectoryHeight = 0;
+			e1.printStackTrace();
+		}
+		
+		//Manchmal liefern nicht alle Frameworks die gleichen Daten. Bei den Videos aus der App Lightcut liefert ffmpeg keine 
+		//Information über Höhe und Breite. Sollte ffmpeg nichts liefern, greifen wir auf MP4VideoDirectory zurück
+		
+		if (ffmpegHeight > 0) {
+			return ffmpegHeight;
+		} else if (ffmpegHeight == 0 && mp4VideoDirectoryHeight > 0 ) {
+			return mp4VideoDirectoryHeight;
+		} else {
+			return 0;
+		}
+	}
+	
+	private int getRawSourceVideoWidthFromAllFrameworks() {
+		
+		int ffmpegWidth = this.ffmpegVideoStream.width;
+		int mp4VideoDirectoryWidth;
+		
+		try {
+			if (this.mp4VideoDirectory == null) {
+				mp4VideoDirectoryWidth = 0;
+			} else {
+				mp4VideoDirectoryWidth = this.mp4VideoDirectory.getInt(Mp4VideoDirectory.TAG_WIDTH);
+			}
+		} catch (MetadataException e1) {
+			mp4VideoDirectoryWidth = 0;
+			e1.printStackTrace();
+		}
+		
+		//Manchmal liefern nicht alle Frameworks die gleichen Daten. Bei den Videos aus der App Lightcut liefert ffmpeg keine 
+		//Information über Höhe und Breite. Sollte ffmpeg nichts liefern, greifen wir auf MP4VideoDirectory zurück
+		
+		
+		if (ffmpegWidth > 0) {
+			return ffmpegWidth;
+		} else if (ffmpegWidth == 0 && mp4VideoDirectoryWidth > 0 ) {
+			return mp4VideoDirectoryWidth;
+		} else {
+			return 0;
 		}
 	}
 }

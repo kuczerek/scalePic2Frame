@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Hashtable;
 
+import javax.imageio.IIOException;
 import javax.imageio.ImageIO;
 
 
@@ -59,9 +60,11 @@ public class Picture {
 		BufferedImage origBi = null;
 		try {
 			origBi = ImageIO.read(this.sourceFile);
-		} catch (IOException e1) {
+		} catch (IIOException e1) {
 			exceptionMessage = e1.getMessage();
-			e1.printStackTrace();
+			//e1.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		this.origBi = origBi;
 		
@@ -73,11 +76,15 @@ public class Picture {
 			this.jpegCommentDirectory = metadata.getFirstDirectoryOfType(JpegCommentDirectory.class);
 		} catch (ImageProcessingException e) {
 			exceptionMessage = e.getMessage();
-			e.printStackTrace();
-		} catch (IOException e) {
+			//e.printStackTrace();
+		} catch (IIOException e) {
+			exceptionMessage = e.getMessage();
+			//e.printStackTrace();
+		} catch (Exception e) {
 			exceptionMessage = e.getMessage();
 			e.printStackTrace();
 		}
+		
 		this.metadata = metadata;
 	}
 

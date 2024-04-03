@@ -44,7 +44,7 @@ public class DirectoryChooser2 extends JFrame {
         this.add( new JScrollPane( tree ));
         
         this.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
-        this.pack();
+        //this.pack();
         this.setLocationRelativeTo( null );
         this.setVisible( true );
     }       

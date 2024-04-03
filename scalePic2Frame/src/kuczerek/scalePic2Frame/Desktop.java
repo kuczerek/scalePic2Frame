@@ -138,6 +138,7 @@ public class Desktop extends JFrame implements ActionListener {
 			
 			DirectoryChooser dc = new DirectoryChooser();
 			//DirectoryChooser2 dc = new DirectoryChooser2();
+			//DirectoryChooser3 dc = new DirectoryChooser3();
 			//dc.showExampleTree();
 			
 			allFiles = dc.getChosenDirectories();
