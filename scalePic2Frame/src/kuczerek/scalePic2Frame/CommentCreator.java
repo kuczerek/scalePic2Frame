@@ -20,6 +20,7 @@ import com.drew.metadata.exif.ExifIFD0Directory;
 import com.drew.metadata.exif.ExifSubIFDDirectory;
 import com.drew.metadata.jpeg.JpegCommentDirectory;
 import com.drew.metadata.mp4.Mp4Directory;
+import com.drew.metadata.mov.QuickTimeDirectory;
 
 public class CommentCreator {
 
@@ -261,7 +262,7 @@ public class CommentCreator {
 		return mediaComment;
 	}
 	
-	public MediaComment createVidComment(BufferedImage targetBi, Graphics2D g2d, Mp4Directory mp4Directory) {
+	public MediaComment createVidComment(BufferedImage targetBi, Graphics2D g2d, Mp4Directory mp4Directory, QuickTimeDirectory qtDirectory) {
 		
 		/*
 		 * Der Kommentar auf den Bildern ist aus drei Teilen zusammengesetzt
@@ -290,6 +291,7 @@ public class CommentCreator {
 		String commentFromPath = null;
 		String commentFromProperty = null;
 		LocalDate localDateMp4 = null;
+		LocalDate localDateQt = null;
 		LocalDate localDateDirString = null;
 		LocalDate localDateFileCreation = null;
 		LocalDate localDateFromProperty = null;
@@ -307,6 +309,9 @@ public class CommentCreator {
 		
 		//Datum aus dem MP4 Directory lesen
 		localDateMp4 = getDateFromMp4Meta(mp4Directory);
+		
+		//Datum aus dem QT Directory lesen
+		localDateQt = getDateFromQtMeta(qtDirectory);
 		 
 		/*
 		 * Zusammenbau des vollen Kommentars
@@ -340,6 +345,12 @@ public class CommentCreator {
 			 */
 			mediaComment.setDateSource(MediaComment.DATESOURCE_MP4);
 			mediaComment.addCommentBehindCurrent(" am " + localDateMp4.format(formatter));
+	    } else if ( localDateQt != null ){
+			/*
+			 * wir nehmen das Datum aus den QT Daten
+			 */
+			mediaComment.setDateSource(MediaComment.DATESOURCE_QT);
+			mediaComment.addCommentBehindCurrent(" am " + localDateQt.format(formatter));
 		} else if ( localDateFromProperty != null ){
 			/*
 			 * wir nehmen das Datum aus der Property Datei
@@ -668,5 +679,25 @@ public class CommentCreator {
 	    }
 	    
 	    return localDateMp4;
+	}
+	
+	private LocalDate getDateFromQtMeta(QuickTimeDirectory qtDirectory) {
+		
+		LocalDate localDateQt = null;
+		
+	    if (qtDirectory != null) {
+			Date dateQt = qtDirectory.getDate(QuickTimeDirectory.TAG_CREATION_TIME );
+			if (dateQt != null) {
+				localDateQt = dateQt.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+				
+				//Wenn kein Datum gespeichert ist, wird offenbar 01.01.1904 geliefert. Wir machen
+				//daraus lieber null.
+				if (localDateQt.isBefore(LocalDate.parse("1905-01-01"))) {
+					localDateQt = null;
+				}
+			}
+	    }
+	    
+	    return localDateQt;
 	}
 }

@@ -28,6 +28,7 @@ public class Process {
 		
 		//Gleich mit dem Testverzeichnis durchstarten?
 		//Path startDir = new File("P:\\Sonstiges\\scalePhotosTest\\Videotest").toPath();
+		//Path startDir = new File("P:\\Sonstiges\\scalePhotosTest\\Fehlerbilder\\2023-09-15 Nature Camp").toPath();
 		//desktop.chooseTestData(startDir);
 	}
 	
@@ -65,7 +66,7 @@ public class Process {
 	    				} else {
 	    					desktop.endLogEntry(pic.getSkipInfo(), pic.getTargetPictureWidth(), pic.getTargetPictureHeight(), pic.getDateSource(), pic.getCommentSource(), pic.getComment());
 	    				}
-        	    	} else if (currentPath.toString().toLowerCase().endsWith("mp4") || currentPath.toString().toLowerCase().endsWith("mov") || currentPath.toString().toLowerCase().endsWith("avi")) {
+        	    	} else if (currentPath.toString().toLowerCase().endsWith("mp4") || currentPath.toString().toLowerCase().endsWith("mov") || currentPath.toString().toLowerCase().endsWith("avi")) {        	    	
         	    		
         	    		vid = new Video(currentPath.toFile());
         	    		desktop.mediaLoadedLogEntry(vid.getSourceVideoWidth(), vid.getSourceVideoHeight());

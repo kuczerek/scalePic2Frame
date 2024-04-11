@@ -93,6 +93,9 @@ public class LogComponent extends JPanel {
 	    case MediaComment.DATESOURCE_MP4:
 	    	dateSourceString = "MP4";
 	        break;
+	    case MediaComment.DATESOURCE_QT:
+	    	dateSourceString = "Quicktime";
+	        break;
 	    default:
 	    	dateSourceString = "";
 		}

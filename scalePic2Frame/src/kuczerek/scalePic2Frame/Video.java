@@ -20,6 +20,8 @@ import com.drew.metadata.Metadata;
 import com.drew.metadata.MetadataException;
 import com.drew.metadata.mp4.Mp4Directory;
 import com.drew.metadata.mp4.media.Mp4VideoDirectory;
+import com.drew.metadata.mov.QuickTimeDirectory;
+import com.drew.metadata.mov.media.QuickTimeVideoDirectory;
 
 import net.bramp.ffmpeg.FFmpeg;
 import net.bramp.ffmpeg.FFmpegExecutor;
@@ -42,6 +44,8 @@ public class Video {
 	private Metadata metadata;
 	private Mp4Directory mp4Directory;
 	private Mp4VideoDirectory mp4VideoDirectory;
+	private QuickTimeDirectory quickTimeDirectory;
+	private QuickTimeVideoDirectory quickTimeVideoDirectory;
 	private FFmpegProbeResult ffmpegProbeResult;
 	private FFmpegFormat ffmpegFormat;
 	private FFmpegStream ffmpegVideoStream;
@@ -73,20 +77,28 @@ public class Video {
 		
 		Metadata metadata = null;
 		try {
-			if (!this.sourceFile.toString().toLowerCase().endsWith("mov")) {
+			if (this.sourceFile.toString().toLowerCase().endsWith("mp4") || this.sourceFile.toString().toLowerCase().endsWith("mov")) {
 				metadata = ImageMetadataReader.readMetadata(this.sourceFile);
 				this.mp4Directory = metadata.getFirstDirectoryOfType(Mp4Directory.class);
 				this.mp4VideoDirectory = metadata.getFirstDirectoryOfType(Mp4VideoDirectory.class);	
+				this.quickTimeDirectory = metadata.getFirstDirectoryOfType(QuickTimeDirectory.class);	
+				this.quickTimeVideoDirectory = metadata.getFirstDirectoryOfType(QuickTimeVideoDirectory.class);	
 			}
+			/*if (this.sourceFile.toString().toLowerCase().endsWith("mov")) {
+				metadata = ImageMetadataReader.readMetadata(this.sourceFile);
+				this.quickTimeDirectory = metadata.getFirstDirectoryOfType(QuickTimeDirectory.class);	
+				this.quickTimeVideoDirectory = metadata.getFirstDirectoryOfType(QuickTimeVideoDirectory.class);	
+			}*/
 		} catch (ImageProcessingException e) {
+			System.out.println("Exception, " + this.sourceFile.toString());
 			exceptionMessage = e.getMessage();
 			e.printStackTrace();
 		} catch (IOException e) {
+			System.out.println("Exception, " + this.sourceFile.toString());
 			exceptionMessage = e.getMessage();
 			e.printStackTrace();
 		}
 		this.metadata = metadata;
-		
 		
 		this.ffmpegProbeResult = null;
 		try {
@@ -102,47 +114,16 @@ public class Video {
 	
 	public boolean shouldWeProcessVideo () {
 		
-		if (this.ffmpegProbeResult ==  null) {
+		if (this.ffmpegProbeResult == null) {
 			//Metadaten konnten nicht gelesen werden
 			skipInfo = "Fehler: " + exceptionMessage;
 			return false;
-		} else if ( !exceptionMessage.equals("")) {
+		} /*else if ( this.ffmpegProbeResult == null && this.metadata == null) {
 			//Metadaten konnten nicht gelesen werden
 			skipInfo = "Fehler: " + exceptionMessage;
 			return false;
-		}
-		
-		int height = 0;
-		int width = 0;
-		
-		//Breite und Höhe vertasuchen, wenn das Video gedreht ist
-		try {
-			if (this.mp4Directory == null) {
-				height = this.ffmpegVideoStream.height;
-				width = this.ffmpegVideoStream.width;
-			} else if (this.mp4Directory.getInt(Mp4Directory.TAG_ROTATION) == 90 || this.mp4Directory.getInt(Mp4Directory.TAG_ROTATION) == -90) {
-				height = this.ffmpegVideoStream.width;
-				width = this.ffmpegVideoStream.height;
-			} else {
-				height = this.ffmpegVideoStream.height;
-				width = this.ffmpegVideoStream.width;
-			}
-		} catch (MetadataException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		//Wir lassen den Größenprüfung bei den Videos mal aus...
-		/*if (height <= Specs.minHeight) {
-			//Video ist zu klein
-			skipInfo = "Übersprungen, das Video ist zu klein.";
-			return false;
-		} else if (width <= Specs.minWidth) {
-			//Videoist zu schmal
-			skipInfo = "Übersprungen, das Videoist zu schmal.";
-			return false;
-		} */
-		
+		}*/
+			
 		return true;
 	}
 
@@ -150,20 +131,8 @@ public class Video {
 		
 		int height = getRawSourceVideoHeightFromAllFrameworks();
 		int width = getRawSourceVideoWidthFromAllFrameworks();
-		int orientation = 0;
-		double calculatedOrientation = (double) height / (double) width;
-		
-		try {
-			if (this.mp4Directory == null ) {
-				orientation = 0;
-			}
-			else {
-				orientation = this.mp4Directory.getInt(Mp4Directory.TAG_ROTATION);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-				
+		int orientation = getOrientation();
+						
 		/*
 		 * Um die Orientietation brauchen wir uns nicht kümment. ffmpeg dreht das
 		 * Video automatisch in der Transkodierung, wenn die Rotation Daten in der
@@ -271,6 +240,7 @@ public class Video {
 		try {
 			this.targetBi = new BufferedImage(getRawSourceVideoWidthFromAllFrameworks(), getRawSourceVideoHeightFromAllFrameworks(), BufferedImage.TYPE_4BYTE_ABGR);
 		} catch (Exception e) {
+			System.out.println("Exception, " + this.sourceFile.toString());
 			e.printStackTrace();
 		}
 		Graphics2D g2d = targetBi.createGraphics();
@@ -293,7 +263,7 @@ public class Video {
 	        
 	    //Kommentar String erzeugen
 	    CommentCreator cc = new CommentCreator(this.sourceFile);
-	    MediaComment mc = cc.createVidComment(this.targetBi, g2d, mp4Directory);
+	    MediaComment mc = cc.createVidComment(this.targetBi, g2d, mp4Directory, quickTimeDirectory);
 	    this.comment = mc.getComment();
 	    this.ffmpegComment = "drawbox=x=0:y=ih-" + Specs.textSize + "-10:w=iw:h=" + Specs.textSize + "+2:t=fill:color=white@0.53, "
 	      + "drawtext=text='" + mc.getComment() + "':"
@@ -364,33 +334,19 @@ public class Video {
 	
 	public int getSourceVideoWidth() {
 		
-		try {
-			if (this.mp4Directory == null) {
-				return getRawSourceVideoWidthFromAllFrameworks();
-			} else if (this.mp4Directory.getInt(Mp4Directory.TAG_ROTATION) == 90 || this.mp4Directory.getInt(Mp4Directory.TAG_ROTATION) == -90){
-				return getRawSourceVideoHeightFromAllFrameworks();
-			} else {
-				return getRawSourceVideoWidthFromAllFrameworks();
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			return 0;
+		if (getOrientation() == 90 || getOrientation() == -90){
+			return getRawSourceVideoHeightFromAllFrameworks();
+		} else {
+			return getRawSourceVideoWidthFromAllFrameworks();
 		}
 	}
 	
 	public int getSourceVideoHeight() {
 		
-		try {
-			if (this.mp4Directory == null) {
-				return getRawSourceVideoHeightFromAllFrameworks();
-			} else if (this.mp4Directory.getInt(Mp4Directory.TAG_ROTATION) == 90 || this.mp4Directory.getInt(Mp4Directory.TAG_ROTATION) == -90){
-				return getRawSourceVideoWidthFromAllFrameworks();
-			} else {
-				return getRawSourceVideoHeightFromAllFrameworks();
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			return 0;
+		if (getOrientation() == 90 || getOrientation() == -90){
+			return getRawSourceVideoWidthFromAllFrameworks();
+		} else {
+			return getRawSourceVideoHeightFromAllFrameworks();
 		}
 	}
 	
@@ -463,18 +419,8 @@ public class Video {
 		
 		int height = getRawSourceVideoHeightFromAllFrameworks();
 		int width = getRawSourceVideoWidthFromAllFrameworks();
-		int orientation = 0;
+		int orientation = getOrientation();
 		double calculatedOrientation = (double) height / (double) width;
-		
-		try {
-			if (this.mp4Directory == null) {
-				orientation = 0;
-			} else {
-				orientation = this.mp4Directory.getInt(Mp4Directory.TAG_ROTATION);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 		
 		if ((orientation == -90 || orientation == 90) && calculatedOrientation < 1 ||
 			(orientation == 0 || orientation == 180) && calculatedOrientation > 1) {	
@@ -497,19 +443,9 @@ public class Video {
 		
 		int height = getRawSourceVideoHeightFromAllFrameworks();
 		int width = getRawSourceVideoWidthFromAllFrameworks();
-		int orientation = 0;
+		int orientation = getOrientation();
 		double calculatedOrientation = (double) height / (double) width;
-		
-		try {
-			if (this.mp4Directory == null) {
-				orientation = 0;
-			} else {
-				orientation = this.mp4Directory.getInt(Mp4Directory.TAG_ROTATION);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
+			
 		if ((orientation == 0 || orientation == -180) && calculatedOrientation < 1 ||
 		    (orientation == -90 || orientation == 90) && calculatedOrientation > 1) {
 			return true;
@@ -522,15 +458,27 @@ public class Video {
 		
 		int ffmpegHeight = this.ffmpegVideoStream.height;
 		int mp4VideoDirectoryHeight;
+		int qtVideoDirectoryHeight;
 		
 		try {
-			if (this.mp4VideoDirectory == null) {
-				mp4VideoDirectoryHeight = 0;
-			} else {
+			if (this.mp4Directory != null) {
 				mp4VideoDirectoryHeight = this.mp4VideoDirectory.getInt(Mp4VideoDirectory.TAG_HEIGHT);
+			} else {
+				mp4VideoDirectoryHeight = 0;
 			}
 		} catch (MetadataException e1) {
 			mp4VideoDirectoryHeight = 0;
+			e1.printStackTrace();
+		}
+		
+		try {
+			if (this.quickTimeDirectory != null) {
+				qtVideoDirectoryHeight = this.quickTimeVideoDirectory.getInt(QuickTimeVideoDirectory.TAG_HEIGHT);
+			} else {
+				qtVideoDirectoryHeight = 0;
+			}
+		} catch (MetadataException e1) {
+			qtVideoDirectoryHeight = 0;
 			e1.printStackTrace();
 		}
 		
@@ -539,8 +487,10 @@ public class Video {
 		
 		if (ffmpegHeight > 0) {
 			return ffmpegHeight;
-		} else if (ffmpegHeight == 0 && mp4VideoDirectoryHeight > 0 ) {
+		} else if (this.mp4Directory != null ) {
 			return mp4VideoDirectoryHeight;
+		} else if (this.quickTimeDirectory != null) {
+			return qtVideoDirectoryHeight;
 		} else {
 			return 0;
 		}
@@ -550,15 +500,27 @@ public class Video {
 		
 		int ffmpegWidth = this.ffmpegVideoStream.width;
 		int mp4VideoDirectoryWidth;
+		int qtVideoDirectoryWidth;
 		
 		try {
-			if (this.mp4VideoDirectory == null) {
-				mp4VideoDirectoryWidth = 0;
-			} else {
+			if (this.mp4Directory != null) {
 				mp4VideoDirectoryWidth = this.mp4VideoDirectory.getInt(Mp4VideoDirectory.TAG_WIDTH);
+			} else {
+				mp4VideoDirectoryWidth = 0;
 			}
 		} catch (MetadataException e1) {
 			mp4VideoDirectoryWidth = 0;
+			e1.printStackTrace();
+		}
+		
+		try {
+			if (this.quickTimeDirectory != null) {
+				qtVideoDirectoryWidth = this.quickTimeVideoDirectory.getInt(QuickTimeVideoDirectory.TAG_WIDTH);
+			} else {
+				qtVideoDirectoryWidth = 0;
+			}
+		} catch (MetadataException e1) {
+			qtVideoDirectoryWidth = 0;
 			e1.printStackTrace();
 		}
 		
@@ -568,10 +530,35 @@ public class Video {
 		
 		if (ffmpegWidth > 0) {
 			return ffmpegWidth;
-		} else if (ffmpegWidth == 0 && mp4VideoDirectoryWidth > 0 ) {
+		} else if (this.mp4Directory != null ) {
 			return mp4VideoDirectoryWidth;
+		} else if (this.quickTimeDirectory != null) {
+			return qtVideoDirectoryWidth;
 		} else {
 			return 0;
 		}
+	}
+	
+	private int getOrientation() {
+		
+		int orientation = 0;
+				
+		if (this.mp4Directory != null) {
+			try {
+				orientation = this.mp4Directory.getInt(Mp4Directory.TAG_ROTATION);
+			} catch (MetadataException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} else if (this.quickTimeDirectory != null) {
+			try {
+				orientation = this.quickTimeDirectory.getInt(QuickTimeDirectory.TAG_ROTATION);
+			} catch (MetadataException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		return orientation;
 	}
 }
