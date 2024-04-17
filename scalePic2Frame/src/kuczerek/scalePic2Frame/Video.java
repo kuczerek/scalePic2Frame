@@ -153,7 +153,7 @@ public class Video {
 		 */
 		
 		/*
-		 * Das Bild muss skaliert werden, damit es auf den Zielscreen passt.
+		 * Das Video muss skaliert werden, damit es auf den Zielscreen passt.
 		 */
 		
 		int scaleWidth = 0;
@@ -167,15 +167,23 @@ public class Video {
 			} else {
 				scaleWidth = (int) (((double) Specs.maxScaleHeight / (double) height) * (double) width);
 			}
-		}
-		
-		if (isLandscape()) {
+		} 
+		else if (isLandscape()) {
 			scaleWidth = Specs.maxScaleWidth;
 			//Ist die orientation auf 90 oder -90 sind width und height vertauscht
 			if (orientation == -90 || orientation == 90) {
 				scaleHeight = (int) (((double) Specs.maxScaleWidth / (double) height) * (double) width);
 			} else {
 				scaleHeight = (int) (((double) Specs.maxScaleWidth / (double) width) * (double) height);
+			}
+		} else {
+			// Das Video ist quadratisch, wir behandeln es mit dem Portrait Code
+			scaleHeight = Specs.maxScaleHeight;
+			//Ist die orientation auf 90 oder -90 sind width und height vertauscht
+			if (orientation == -90 || orientation == 90) {
+				scaleWidth = (int) (((double) Specs.maxScaleHeight / (double) width) * (double) height);
+			} else {
+				scaleWidth = (int) (((double) Specs.maxScaleHeight / (double) height) * (double) width);
 			}
 		}
 				
@@ -231,8 +239,12 @@ public class Video {
 		int overlayX = padX;
 		int overlayY = padY;		
 		
-		this.ffmpegScale = this.ffmpegScale + "[blur][crp1]overlay=" + overlayX + ":" + overlayY;
-		//this.ffmpegScale = this.ffmpegScale + "[blur][crp1]overlay=(main_w-overlay_w)/2:(main_h-overlay_h)/2";		
+		/*
+		 * Der fertige String sollte in etwas so aussehen:
+		 * scale=w=1920:h=1080, crop=1920:1080:0:60,split[crp0][crp1];[crp0]scale=1920:1200,setsar=1:1,gblur=sigma=30[blur];[blur][crp1]overlay=0:60
+		 */
+		
+		this.ffmpegScale = this.ffmpegScale + "[blur][crp1]overlay=" + overlayX + ":" + overlayY;		
 	}
 
 	public void createComment() {
@@ -265,6 +277,12 @@ public class Video {
 	    CommentCreator cc = new CommentCreator(this.sourceFile);
 	    MediaComment mc = cc.createVidComment(this.targetBi, g2d, mp4Directory, quickTimeDirectory);
 	    this.comment = mc.getComment();
+	    
+	    /*
+	     * Der fertige String sollte in etwas so aussehen:
+	     * drawbox=x=0:y=ih-50-10:w=iw:h=50+2:t=fill:color=white@0.53, drawtext=text='Videotest am 29.12.2023':fontfile=C\\:/Windows/Fonts/FreeSansBold.ttf:fontsize=50:y_align=baseline:fontcolor=black:x=w/2-tw/2:y=h-10-th/10
+	     */
+	    
 	    this.ffmpegComment = "drawbox=x=0:y=ih-" + Specs.textSize + "-10:w=iw:h=" + Specs.textSize + "+2:t=fill:color=white@0.53, "
 	      + "drawtext=text='" + mc.getComment() + "':"
 	      + "fontfile=C\\:/Windows/Fonts/FreeSansBold.ttf:fontsize=" + Specs.textSize + ":"
