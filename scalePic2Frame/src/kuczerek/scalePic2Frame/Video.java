@@ -104,12 +104,12 @@ public class Video {
 		try {
 			FFprobe ffprobe = new FFprobe(Specs.ffmpegPath + File.separator + "ffprobe");
 			this.ffmpegProbeResult = ffprobe.probe(sourceFile.toPath().toString());
+			this.ffmpegFormat = this.ffmpegProbeResult.getFormat();
+			this.ffmpegVideoStream = this.ffmpegProbeResult.getStreams().get(0);
 		} catch (IOException e) {
 			exceptionMessage = e.getMessage();
 			e.printStackTrace();
 		}
-		this.ffmpegFormat = this.ffmpegProbeResult.getFormat();
-		this.ffmpegVideoStream = this.ffmpegProbeResult.getStreams().get(0);		
 	}
 	
 	public boolean shouldWeProcessVideo () {
@@ -327,8 +327,20 @@ public class Video {
 		
 		FFmpegExecutor executor = new FFmpegExecutor(ffmpeg, ffprobe);
 
-		// Run a one-pass encode
+		// Run a one-pass encode without progress Information
 		executor.createJob(builder).run();
+		
+		// Run a one-pass encode with progress Information
+		/*FFmpegJob job = executor.createJob(builder, new ProgressListener() {
+			
+			@Override
+			public void progress(Progress progress) {
+				// Print out interesting information about the progress
+				System.out.println("Frame: " + progress.frame);
+			}
+		});
+		System.out.println("Sourcefile: " + sourceFile.toPath().toString());
+		job.run();*/
 	}
 	
 	public String getTargetVideoPath() {		
@@ -474,12 +486,18 @@ public class Video {
 	
 	private int getRawSourceVideoHeightFromAllFrameworks() {
 		
-		int ffmpegHeight = this.ffmpegVideoStream.height;
+		int ffmpegHeight;
 		int mp4VideoDirectoryHeight;
 		int qtVideoDirectoryHeight;
 		
+		if (this.ffmpegVideoStream != null) {
+			ffmpegHeight = this.ffmpegVideoStream.height;
+		} else {
+			ffmpegHeight = 0;
+		}
+		
 		try {
-			if (this.mp4Directory != null) {
+			if (this.mp4VideoDirectory != null) {
 				mp4VideoDirectoryHeight = this.mp4VideoDirectory.getInt(Mp4VideoDirectory.TAG_HEIGHT);
 			} else {
 				mp4VideoDirectoryHeight = 0;
@@ -490,7 +508,7 @@ public class Video {
 		}
 		
 		try {
-			if (this.quickTimeDirectory != null) {
+			if (this.quickTimeVideoDirectory != null) {
 				qtVideoDirectoryHeight = this.quickTimeVideoDirectory.getInt(QuickTimeVideoDirectory.TAG_HEIGHT);
 			} else {
 				qtVideoDirectoryHeight = 0;
@@ -516,12 +534,18 @@ public class Video {
 	
 	private int getRawSourceVideoWidthFromAllFrameworks() {
 		
-		int ffmpegWidth = this.ffmpegVideoStream.width;
+		int ffmpegWidth;
 		int mp4VideoDirectoryWidth;
 		int qtVideoDirectoryWidth;
 		
+		if (this.ffmpegVideoStream != null) {
+			ffmpegWidth = this.ffmpegVideoStream.width;
+		} else {
+			ffmpegWidth = 0;
+		}
+		
 		try {
-			if (this.mp4Directory != null) {
+			if (this.mp4VideoDirectory != null) {
 				mp4VideoDirectoryWidth = this.mp4VideoDirectory.getInt(Mp4VideoDirectory.TAG_WIDTH);
 			} else {
 				mp4VideoDirectoryWidth = 0;
@@ -532,7 +556,7 @@ public class Video {
 		}
 		
 		try {
-			if (this.quickTimeDirectory != null) {
+			if (this.quickTimeVideoDirectory != null) {
 				qtVideoDirectoryWidth = this.quickTimeVideoDirectory.getInt(QuickTimeVideoDirectory.TAG_WIDTH);
 			} else {
 				qtVideoDirectoryWidth = 0;
